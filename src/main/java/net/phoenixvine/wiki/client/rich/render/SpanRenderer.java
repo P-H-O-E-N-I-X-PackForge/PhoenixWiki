@@ -8,12 +8,15 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.phoenixvine.wiki.client.rich.RichSpan;
 import net.phoenixvine.wiki.client.rich.WikiRichTextRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class SpanRenderer {
 
@@ -240,6 +243,7 @@ public final class SpanRenderer {
 
         String[] lines = text.split("\n", -1);
         Style running = style;
+        List<String[]> openTags = new ArrayList<>();
         for (int li = 0; li < lines.length; li++) {
             if (li > 0) {
                 curX = originX;
@@ -254,11 +258,12 @@ public final class SpanRenderer {
 
             for (String token : tokens) {
                 if (token.isBlank() && curX == originX) continue;
-                Style newStyle = applyLegacyCodes(running, token);
+                Style newStyle = applyLeadingLegacyCodes(running, token);
+                Style styleAfterToken = applyLegacyCodes(running, token);
                 float tokScale = boldScale(scale, newStyle.isBold());
                 int tokW = Math.round(font.width(Component.literal(token).withStyle(newStyle)) * tokScale);
                 if (curX + tokW > originX + maxW && curX > originX) {
-                    flushRun(g, font, run, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
+                    flushRunKeepingTags(g, font, run, openTags, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
                             boldScale(scale, runStyle.isBold()), background);
                     curX = originX;
                     curY += lineH;
@@ -266,11 +271,11 @@ public final class SpanRenderer {
                 }
 
                 if (!newStyle.equals(runStyle) && !run.isEmpty()) {
-                    flushRun(g, font, run, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
+                    flushRunKeepingTags(g, font, run, openTags, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
                             boldScale(scale, runStyle.isBold()), background);
                     runStartX = curX;
                 }
-                running = newStyle;
+                running = styleAfterToken;
                 runStyle = newStyle;
 
                 if (tokW > maxW) {
@@ -279,12 +284,13 @@ public final class SpanRenderer {
                         char ch = token.charAt(ci);
                         int chW = Math.round(font.width(String.valueOf(ch)) * tokScale);
                         if (curX + chW > originX + maxW && curX > originX) {
-                            flushRun(g, font, run, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
+                            flushRunKeepingTags(g, font, run, openTags, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
                                     boldScale(scale, runStyle.isBold()), background);
                             curX = originX;
                             curY += lineH;
                             runStartX = curX;
                         }
+                        if (run.isEmpty()) reopenTags(run, openTags);
                         run.append(ch);
                         if (interactive && curY >= clipTop && curY + lineH <= clipBot) {
                             regions.add(new RichSpan.Region(curX, curY, curX + chW, curY + lineH, regionPayload));
@@ -294,17 +300,69 @@ public final class SpanRenderer {
                     continue;
                 }
 
+                if (run.isEmpty()) reopenTags(run, openTags);
                 run.append(token);
+                trackTags(token, openTags);
 
                 if (interactive && !token.isBlank() && curY >= clipTop && curY + lineH <= clipBot) {
                     regions.add(new RichSpan.Region(curX, curY, curX + tokW, curY + lineH, regionPayload));
                 }
                 curX += tokW;
             }
-            flushRun(g, font, run, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
+            flushRunKeepingTags(g, font, run, openTags, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot,
                     boldScale(scale, runStyle.isBold()), background);
         }
         return new int[] { curX, curY };
+    }
+
+    private static final Pattern EFFECT_TAG = Pattern.compile("<(/?)([A-Za-z][A-Za-z0-9_]*)[^<>\\n]*>");
+    private static Boolean textAnimatorLoaded;
+
+    /** Text Animator parses {@code <effect ...>text</effect>} inside whatever string it is asked to draw. */
+    private static boolean effectTagsEnabled() {
+        if (textAnimatorLoaded == null) {
+            ModList mods = ModList.get();
+            textAnimatorLoaded = mods != null && mods.isLoaded("textanimator");
+        }
+        return textAnimatorLoaded;
+    }
+
+    /** End index (exclusive) of an effect tag starting at {@code from}, or -1 when there isn't one. */
+    private static int effectTagEnd(String s, int from) {
+        Matcher m = EFFECT_TAG.matcher(s);
+        m.region(from, s.length());
+        return m.lookingAt() ? m.end() : -1;
+    }
+
+    private static void trackTags(String token, List<String[]> open) {
+        if (!effectTagsEnabled() || token.indexOf('<') < 0) return;
+        Matcher m = EFFECT_TAG.matcher(token);
+        while (m.find()) {
+            String name = m.group(2);
+            if (!m.group(1).isEmpty()) {
+                for (int i = open.size() - 1; i >= 0; i--) {
+                    if (open.get(i)[0].equals(name)) {
+                        open.remove(i);
+                        break;
+                    }
+                }
+            } else {
+                open.add(new String[] { name, m.group() });
+            }
+        }
+    }
+
+    /** A line break ends a drawn run, so an effect still open must be re-opened where the next run begins. */
+    private static void reopenTags(StringBuilder run, List<String[]> open) {
+        for (String[] tag : open) run.append(tag[1]);
+    }
+
+    private static void flushRunKeepingTags(GuiGraphics g, Font font, StringBuilder run, List<String[]> open,
+                                            Style runStyle, int fallbackColor, int runStartX, int curY, int clipTop,
+                                            int clipBot, float scale, int background) {
+        if (run.isEmpty()) return;
+        for (int i = open.size() - 1; i >= 0; i--) run.append("</").append(open.get(i)[0]).append('>');
+        flushRun(g, font, run, runStyle, fallbackColor, runStartX, curY, clipTop, clipBot, scale, background);
     }
 
     private static void flushRun(GuiGraphics g, Font font, StringBuilder run, Style runStyle, int fallbackColor,
@@ -343,9 +401,10 @@ public final class SpanRenderer {
             }
             for (String token : tokenize(lines[li])) {
                 if (token.isBlank() && curX == originX) continue;
+                Style startStyle = applyLeadingLegacyCodes(running, token);
                 running = applyLegacyCodes(running, token);
-                float tokScale = boldScale(scale, running.isBold());
-                int tokW = Math.round(font.width(Component.literal(token).withStyle(running)) * tokScale);
+                float tokScale = boldScale(scale, startStyle.isBold());
+                int tokW = Math.round(font.width(Component.literal(token).withStyle(startStyle)) * tokScale);
                 if (curX + tokW > originX + maxW && curX > originX) {
                     curX = originX;
                     curY += lineH;
@@ -368,10 +427,28 @@ public final class SpanRenderer {
         return new int[] { curX, curY };
     }
 
+    /** The style after every legacy code in the token - what the text following the token should use. */
     private static Style applyLegacyCodes(Style base, String token) {
+        return applyLegacyCodes(base, token, token.length());
+    }
+
+    /**
+     * Only the codes before the token's first visible character. Codes later in the token (a trailing
+     * {@code \u00A7r}, say) take effect from where they appear, and the font applies them itself while drawing
+     * the token's text - so using them to style the whole token reset the word they trail.
+     */
+    private static Style applyLeadingLegacyCodes(Style base, String token) {
+        int end = 0;
+        while (end + 1 < token.length() && token.charAt(end) == '\u00A7' &&
+                ChatFormatting.getByCode(token.charAt(end + 1)) != null) {
+            end += 2;
+        }
+        return applyLegacyCodes(base, token, end);
+    }
+
+    private static Style applyLegacyCodes(Style base, String token, int limit) {
         Style style = base;
-        int len = token.length();
-        for (int i = 0; i < len - 1; i++) {
+        for (int i = 0; i < limit - 1; i++) {
             if (token.charAt(i) != '\u00A7') continue;
             var fmt = ChatFormatting.getByCode(token.charAt(i + 1));
             if (fmt == null) continue;
@@ -392,9 +469,13 @@ public final class SpanRenderer {
         if (s.isEmpty()) return new String[] { "" };
         List<String> tokens = new ArrayList<>();
         int i = 0, len = s.length();
+        boolean keepTags = effectTagsEnabled();
         while (i < len) {
             int start = i;
-            while (i < len && s.charAt(i) != ' ') i++;
+            while (i < len && s.charAt(i) != ' ') {
+                int tagEnd = keepTags && s.charAt(i) == '<' ? effectTagEnd(s, i) : -1;
+                i = tagEnd > 0 ? tagEnd : i + 1;
+            }
             while (i < len && s.charAt(i) == ' ') i++;
             tokens.add(s.substring(start, i));
         }
