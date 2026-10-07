@@ -176,7 +176,6 @@ public final class SuiteHudConfig {
         }
     }
 
-    /** Clears every custom-dragged button position, returning all buttons to the natural grid. */
     public static void clearAllButtonAnchors() {
         synchronized (LOCK) {
             ensureLoaded();
@@ -185,8 +184,6 @@ public final class SuiteHudConfig {
         }
     }
 
-    /** Backs the "shy button" easter egg -- every 3rd hide is spared instead of applied. Returns
-     *  the new cumulative hide count for {@code modId}. */
     public static int incrementHideCount(String modId) {
         synchronized (LOCK) {
             ensureLoaded();
@@ -197,8 +194,6 @@ public final class SuiteHudConfig {
         }
     }
 
-    /** Backs the escalating hover tooltip ("Wiki" -> "Still here." -> "You've hovered this N
-     *  times."). Returns the new cumulative hover count for {@code modId}. */
     public static int incrementHoverCount(String modId) {
         synchronized (LOCK) {
             ensureLoaded();
@@ -239,8 +234,6 @@ public final class SuiteHudConfig {
         }
     }
 
-    /** Un-piles every button gravity dropped (clears their custom anchor, back to the natural
-     *  grid) without touching anything the player dragged themselves. */
     public static void clearGravityPiles() {
         synchronized (LOCK) {
             ensureLoaded();
@@ -250,8 +243,6 @@ public final class SuiteHudConfig {
         }
     }
 
-    /** Called when the player manually grabs a gravity-piled button -- it's a real drag target
-     *  now, so a later gravity-off toggle shouldn't snap it back to the grid. */
     public static void unmarkGravityPlaced(String key) {
         synchronized (LOCK) {
             ensureLoaded();

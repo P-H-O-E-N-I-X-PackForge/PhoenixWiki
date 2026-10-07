@@ -10,18 +10,42 @@ public final class ImageSpans {
 
     public static void addImage(List<RichSpan> out, String rlPart) {
         int w = 48, h = 48;
-        String[] parts = rlPart.split(",", 3);
+        float rotation = 0f;
+        String[] parts = rlPart.split(",");
         rlPart = parts[0].trim();
-        if (parts.length >= 3) {
+        int positional = 0;
+        for (int i = 1; i < parts.length; i++) {
+            String part = parts[i].trim();
+            if (part.isEmpty()) {
+                positional++;
+                continue;
+            }
+            String key;
+            String value;
+            int eq = part.indexOf('=');
+            if (eq > 0) {
+                key = part.substring(0, eq).trim().toLowerCase();
+                value = part.substring(eq + 1).trim();
+            } else {
+                key = switch (positional++) {
+                    case 0 -> "w";
+                    case 1 -> "h";
+                    case 2 -> "rot";
+                    default -> "";
+                };
+                value = part;
+            }
             try {
-                w = Integer.parseInt(parts[1].trim());
-            } catch (NumberFormatException ignored) {}
-            try {
-                h = Integer.parseInt(parts[2].trim());
+                switch (key) {
+                    case "w", "width" -> w = Integer.parseInt(value);
+                    case "h", "height" -> h = Integer.parseInt(value);
+                    case "r", "rot", "rotate", "rotation" -> rotation = Float.parseFloat(value);
+                    default -> {}
+                }
             } catch (NumberFormatException ignored) {}
         }
         try {
-            out.add(new RichSpan.Image(ResourceLocation.parse(rlPart), w, h));
+            out.add(new RichSpan.Image(ResourceLocation.parse(rlPart), w, h, rotation));
         } catch (Exception ignored) {}
     }
 }

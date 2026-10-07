@@ -7,6 +7,8 @@ import net.phoenixvine.wiki.client.rich.markdown.inline.InlineParseState;
 
 public final class ColorTokenHandler implements InlineHandler {
 
+    private static final float DEFAULT_TYPEWRITER_SPEED = 30f;
+
     @Override
     public char trigger() {
         return '{';
@@ -21,6 +23,29 @@ public final class ColorTokenHandler implements InlineHandler {
         if (token.startsWith("#") && token.length() == 7 && isHex6(token)) {
             s.flush();
             s.style = s.style.withColor(TextColor.fromRgb((int) Long.parseLong(token.substring(1), 16)));
+            return end + 1;
+        }
+        String lower = token.toLowerCase();
+        if (lower.equals("/type") || lower.equals("/typewriter")) {
+            s.endTypewriter();
+            return end + 1;
+        }
+        if (lower.equals("type") || lower.equals("typewriter") || lower.startsWith("type:") ||
+                lower.startsWith("typewriter:")) {
+            float charsPerSecond = DEFAULT_TYPEWRITER_SPEED;
+            boolean onClick = false;
+            String[] parts = lower.split(":");
+            for (int p = 1; p < parts.length; p++) {
+                if (parts[p].equals("click")) {
+                    onClick = true;
+                } else if (!parts[p].equals("auto")) {
+                    try {
+                        float parsed = Float.parseFloat(parts[p]);
+                        if (parsed > 0f) charsPerSecond = parsed;
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            s.beginTypewriter(charsPerSecond, onClick, i);
             return end + 1;
         }
         if (token.equalsIgnoreCase("reset")) {

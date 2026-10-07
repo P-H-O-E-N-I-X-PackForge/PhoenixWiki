@@ -69,8 +69,7 @@ public class WikiScreen extends Screen {
     private static final long COPY_FLASH_MS = 1400L;
     private long checklistCompleteAtMs = 0L;
     private static final long CHECKLIST_FLASH_MS = 2200L;
-    /** Set instead of navigating when a target/linked page id doesn't resolve to a real page --
-     *  a synthetic page shown in place of the real content, never added to {@link #pages}. */
+    
     private WikiPageLoader.Page notFoundPage = null;
     private int sidebarW = DEFAULT_SIDEBAR_W;
     private boolean draggingSidebar = false;
@@ -320,8 +319,6 @@ public class WikiScreen extends Screen {
         });
     }
 
-    /** Swaps in a synthetic "page not found" page instead of navigating -- used when a target or
-     *  linked page id doesn't resolve to anything in {@link #pages}. */
     private void showNotFound(String missingId) {
         String backLink = pages.isEmpty() ? "" :
                 "\n\n[← Back to the welcome page](wiki:" + pages.get(0).id() + ")";
@@ -348,8 +345,6 @@ public class WikiScreen extends Screen {
                 || !expandedKeys.contains("CL0:" + cl.checkKey()) && cl.checkedDefault();
     }
 
-    /** True only if the page has at least one checklist item and every one of them is checked --
-     *  matches the exact checked-state formula ChecklistBlockRenderer uses to draw the glyph. */
     private boolean allChecklistsComplete(List<RichBlock> blocks) {
         boolean any = false;
         for (RichBlock b : blocks) {
@@ -712,6 +707,10 @@ public class WikiScreen extends Screen {
                                     "PhoenixWiki: failed to open link '{}'", l.url(), e);
                         }
                     }
+                    return true;
+                }
+                if (r.span() instanceof RichSpan.TypewriterReveal reveal) {
+                    net.phoenixvine.wiki.client.rich.render.TypewriterSupport.start(reveal.key());
                     return true;
                 }
                 if (r.span() instanceof RichSpan.CodeCopy cc) {

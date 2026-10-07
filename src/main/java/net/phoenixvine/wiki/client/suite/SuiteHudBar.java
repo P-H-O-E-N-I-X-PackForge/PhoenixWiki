@@ -124,8 +124,6 @@ public final class SuiteHudBar {
         return Math.round(BTN_SIZE * SuiteHudConfig.getEffectiveScale(modId));
     }
 
-    /** Puts every button back in its natural grid slot and forgets any in-flight drag/undo state
-     *  tied to the positions being cleared. */
     public static void resetAllButtonPositions() {
         SuiteHudConfig.clearAllButtonAnchors();
         UNDO_STACK.clear();
@@ -142,8 +140,6 @@ public final class SuiteHudBar {
         return Math.max(0, Math.min(v, Math.max(0, screenDim - size)));
     }
 
-    /** Converts an absolute top-left (x,y) into the {@code [anchorRight, distX, anchorBottom,
-     *  distY]} form the config stores -- shared by drag-release and gravity-mode landing. */
     private static int[] toAnchor(int x, int y, int size, int screenW, int screenH) {
         boolean anchorRight = x + size / 2 > screenW / 2;
         boolean anchorBottom = y + size / 2 > screenH / 2;
@@ -206,8 +202,6 @@ public final class SuiteHudBar {
             int screenW = window.getGuiScaledWidth();
             int screenH = window.getGuiScaledHeight();
 
-            // Pass 1: resolve every button NOT currently in flight (anchored, or its natural
-            // grid slot). These double as the "floor" in-flight buttons can land/pile on.
             int[] restX = new int[n], restY = new int[n];
             boolean[] inFlight = new boolean[n];
             boolean[] resolved = new boolean[n];
@@ -233,10 +227,6 @@ public final class SuiteHudBar {
                 resolved[idx] = true;
             }
 
-            // Pass 2: integrate flight for the rest, landing/piling on whatever's already
-            // resolved -- including earlier buttons in this very loop, but NOT a not-yet-reached
-            // in-flight sibling, whose restX/restY are still meaningless zeroes at this point
-            // (that gap used to read as a phantom obstacle sitting at the top-left corner).
             for (int idx = 0; idx < n; idx++) {
                 if (!inFlight[idx]) continue;
                 String key = keys.get(idx);
@@ -275,11 +265,8 @@ public final class SuiteHudBar {
         return slots.isEmpty() ? 0 : maxBottom + MARGIN;
     }
 
-    /** EMI's recipe browser is a plain Screen (not a container), but EMI's sidebars show there, so we do too.
-     *  Matched by name so there's no hard dependency on EMI. */
     private static final String EMI_RECIPE_SCREEN = "dev.emi.emi.screen.RecipeScreen";
 
-    /** NOTE: despite the name, {@code true} means the bar is <b>skipped</b> on this screen. */
     public static boolean screenWantsBar(Screen screen) {
         if (screen instanceof Aware) return false;
         if (screen.getClass().getName().equals(EMI_RECIPE_SCREEN)) return false;
@@ -295,16 +282,6 @@ public final class SuiteHudBar {
         return true;
     }
 
-    /**
-     * Screen-space rectangles ({@code x, y, width, height}, GUI-scaled) that recipe-viewer integrations (EMI)
-     * should keep clear. Empty when the bar isn't shown on {@code screen}.
-     *
-     * <p>Buttons still sitting in their default grid are reported as <b>one</b> merged rectangle, not one per
-     * button. EMI resolves each exclusion rect independently by cutting its whole sidebar panel to one side of
-     * it, so 15 little rects make it shift the panel right past the first column of buttons even in the rows
-     * below them. One rect gives it a single cut (panel sits under the grid, flush left). Buttons the user has
-     * dragged elsewhere are reported individually, so they're still respected wherever they end up.
-     */
     public static List<int[]> getButtonBounds(Screen screen) {
         var mc = Minecraft.getInstance();
         if (mc.player == null || entriesEmpty() || screenWantsBar(screen)) return List.of();
@@ -338,17 +315,11 @@ public final class SuiteHudBar {
     @Nullable
     private static int[] dragStartAnchor;
 
-    /** Recent (x, y, ms) drag samples, oldest first, trimmed to {@link #THROW_WINDOW_MS}. Throw
-     *  velocity is measured across this whole window rather than just the last drag event --
-     *  real flick gestures decelerate right before release, so sampling only the final delta
-     *  captures the slowest instant of the motion instead of the actual throw. */
     private static final Deque<double[]> dragSamples = new ArrayDeque<>();
     private static final long THROW_WINDOW_MS = 120L;
 
     private static final int MAX_UNDO = 20;
 
-    /** One entry per undoable action (a drag, or a hide) -- Ctrl+Z just runs whatever the most
-     *  recent one captured, so both kinds share one chronological stack. */
     private record UndoEntry(Runnable undo) {}
 
     private static final Deque<UndoEntry> UNDO_STACK = new ArrayDeque<>();
@@ -363,12 +334,6 @@ public final class SuiteHudBar {
         return java.util.Arrays.equals(a, b);
     }
 
-    // --- Gravity mode ------------------------------------------------------------------------
-
-    /** A button in free flight: real velocity, gravity, wall/floor bounces, and piling on top of
-     *  whatever's already settled underneath it. Mutable (updated in place every frame) rather
-     *  than a record, since re-allocating one every tick for every falling/thrown button would
-     *  otherwise churn a lot of garbage. */
     private static final class PhysicsState {
 
         double x, y, vx, vy;
@@ -389,12 +354,6 @@ public final class SuiteHudBar {
         return SuiteHudConfig.isGravityMode();
     }
 
-    /** Flips gravity mode. Turning it on drops <i>every</i> currently-visible button from
-     *  wherever it happens to be sitting right now -- including ones you'd previously dragged
-     *  somewhere, like a cluster sitting on top of EMI's favorites bar -- into a pile at the
-     *  bottom of the screen. Turning it off puts every gravity-dropped button back in the grid.
-     *  While it's on, throwing a button (release a fast middle-click drag) launches it with real
-     *  momentum instead of placing it instantly -- see {@link #onScreenMouseRelease}. */
     public static void setGravityMode(boolean enabled) {
         if (enabled == SuiteHudConfig.isGravityMode()) return;
         SuiteHudConfig.setGravityModeFlag(enabled);
@@ -422,8 +381,6 @@ public final class SuiteHudBar {
         }
     }
 
-    /** Launches a button with real velocity -- used both by the pile-drop (v=0) and by throwing
-     *  a button mid-drag (see {@link #onScreenMouseRelease}). */
     private static void launch(String key, double x, double y, double vx, double vy) {
         PhysicsState p = new PhysicsState();
         p.x = x;
@@ -436,11 +393,6 @@ public final class SuiteHudBar {
         SuiteHudConfig.markGravityPlaced(key);
     }
 
-    /** Integrates one frame of {@code p}'s flight, bouncing off the screen edges and piling on
-     *  top of any other slot ({@code restX}/{@code restY}, already-resolved this frame) it lands
-     *  on. Returns true once it's settled (resting, slow enough to stop). Two buttons thrown at
-     *  the same instant won't collide with each other mid-air -- only with what's already
-     *  settled -- a deliberate scope cut rather than a full N-body simulation. */
     private static boolean tickPhysics(PhysicsState p, int size, int screenW, int screenH,
                                        List<String> keys, int[] restX, int[] restY, List<Integer> sizes,
                                        boolean[] resolved, int selfIdx) {
@@ -488,8 +440,6 @@ public final class SuiteHudBar {
         return false;
     }
 
-    // --- Phoenix rebirth + shy button ---------------------------------------------------------
-
     private static String justRebornModId = null;
     private static long justRebornAtMs = 0L;
     private static final long REBIRTH_FLOURISH_MS = 700L;
@@ -500,8 +450,6 @@ public final class SuiteHudBar {
 
     private static String lastHoveredKey = null;
 
-    /** Every 3rd right-click hide is spared instead of applied -- "peeks back in" by just... not
-     *  hiding, with a sad tooltip for a few seconds next time it's hovered. */
     private static void hideButton(String modId) {
         int count = SuiteHudConfig.incrementHideCount(modId);
         if (count % 3 == 0) {
@@ -516,7 +464,6 @@ public final class SuiteHudBar {
             justRebornAtMs = System.currentTimeMillis();
         });
     }
-
 
     private static void draw(GuiGraphics g, Minecraft mc, double hoverMx, double hoverMy) {
         var theme = PhoenixTheme.current();
@@ -698,8 +645,6 @@ public final class SuiteHudBar {
         SuiteHudConfig.setButtonAnchorLive(draggingKey, a[0] == 1, a[1], a[2] == 1, a[3]);
     }
 
-    /** Throw velocity averaged over the last {@link #THROW_WINDOW_MS} of drag movement, so a
-     *  natural end-of-flick deceleration doesn't zero out the throw. */
     private static double[] throwVelocity() {
         if (dragSamples.size() < 2) return new double[] { 0, 0 };
         double[] oldest = dragSamples.peekFirst();
@@ -725,8 +670,7 @@ public final class SuiteHudBar {
         dragStartAnchor = null;
 
         if (SuiteHudConfig.isGravityMode()) {
-            // Thrown: launches with velocity averaged over the recent drag window, instead of
-            // snapping straight to an anchor -- see tickPhysics for the flight itself.
+
             launch(key, atX, atY, v[0], v[1]);
             pushUndo(() -> {
                 physics.remove(key);

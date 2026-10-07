@@ -133,12 +133,22 @@ public final class SpanRenderer {
                     curX = originX;
                     curY[0] += lineH;
                 }
-                if (curY[0] >= clipTop && curY[0] + img.h() <= clipBot) {
-                    g.blit(WikiRichTextRenderer.imageResolver.apply(img.texture()),
-                            curX, curY[0], 0, 0, img.w(), img.h(), img.w(), img.h());
-                    regions.add(new RichSpan.Region(curX, curY[0], curX + img.w(), curY[0] + img.h(), img));
+                int boundsW = img.boundsW(), boundsH = img.boundsH();
+                if (curY[0] >= clipTop && curY[0] + boundsH <= clipBot) {
+                    if (img.rotation() == 0f) {
+                        g.blit(WikiRichTextRenderer.imageResolver.apply(img.texture()),
+                                curX, curY[0], 0, 0, img.w(), img.h(), img.w(), img.h());
+                    } else {
+                        g.pose().pushPose();
+                        g.pose().translate(curX + boundsW / 2f, curY[0] + boundsH / 2f, 0f);
+                        g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(img.rotation()));
+                        g.blit(WikiRichTextRenderer.imageResolver.apply(img.texture()),
+                                -img.w() / 2, -img.h() / 2, 0, 0, img.w(), img.h(), img.w(), img.h());
+                        g.pose().popPose();
+                    }
+                    regions.add(new RichSpan.Region(curX, curY[0], curX + boundsW, curY[0] + boundsH, img));
                 }
-                curY[0] += img.h() + 2;
+                curY[0] += boundsH + 2;
                 curX = originX;
             } else if (span instanceof RichSpan.ItemIcon icon) {
                 if (curX + 18 > originX + maxW && curX > originX) {
@@ -195,7 +205,7 @@ public final class SpanRenderer {
         for (RichSpan span : spans) {
             if (span instanceof RichSpan.Image img) {
                 if (curX > 0) curY += lineH;
-                curY += img.h() + 2;
+                curY += img.boundsH() + 2;
                 curX = 0;
             } else if (span instanceof RichSpan.ItemIcon) {
                 if (curX + 18 > maxW && curX > 0) {
@@ -236,9 +246,21 @@ public final class SpanRenderer {
 
         int lineH = Math.round(LINE_H * scale);
         String inlineCodeText = source instanceof RichSpan.Text t ? t.copyText() : null;
+
+        boolean awaitingClick = false;
+        String typewriterKey = null;
+        if (source instanceof RichSpan.Text tw && tw.typewriter() != null) {
+            TypewriterSupport.Frame frame = TypewriterSupport.frame(tw);
+            text = frame.text();
+            awaitingClick = frame.awaitingClick();
+            typewriterKey = frame.key();
+            if (text.isEmpty()) return new int[] { curX, curY };
+        }
+
         boolean interactive = source instanceof RichSpan.Link || source instanceof RichSpan.Tip ||
-                inlineCodeText != null;
-        RichSpan regionPayload = inlineCodeText != null ? new RichSpan.CodeCopy(inlineCodeText) : source;
+                inlineCodeText != null || awaitingClick;
+        RichSpan regionPayload = awaitingClick ? new RichSpan.TypewriterReveal(typewriterKey) :
+                inlineCodeText != null ? new RichSpan.CodeCopy(inlineCodeText) : source;
         int background = source instanceof RichSpan.Text t ? t.background() : 0;
 
         String[] lines = text.split("\n", -1);
@@ -318,7 +340,6 @@ public final class SpanRenderer {
     private static final Pattern EFFECT_TAG = Pattern.compile("<(/?)([A-Za-z][A-Za-z0-9_]*)[^<>\\n]*>");
     private static Boolean textAnimatorLoaded;
 
-    /** Text Animator parses {@code <effect ...>text</effect>} inside whatever string it is asked to draw. */
     private static boolean effectTagsEnabled() {
         if (textAnimatorLoaded == null) {
             ModList mods = ModList.get();
@@ -327,7 +348,6 @@ public final class SpanRenderer {
         return textAnimatorLoaded;
     }
 
-    /** End index (exclusive) of an effect tag starting at {@code from}, or -1 when there isn't one. */
     private static int effectTagEnd(String s, int from) {
         Matcher m = EFFECT_TAG.matcher(s);
         m.region(from, s.length());
@@ -352,7 +372,6 @@ public final class SpanRenderer {
         }
     }
 
-    /** A line break ends a drawn run, so an effect still open must be re-opened where the next run begins. */
     private static void reopenTags(StringBuilder run, List<String[]> open) {
         for (String[] tag : open) run.append(tag[1]);
     }
@@ -427,16 +446,10 @@ public final class SpanRenderer {
         return new int[] { curX, curY };
     }
 
-    /** The style after every legacy code in the token - what the text following the token should use. */
     private static Style applyLegacyCodes(Style base, String token) {
         return applyLegacyCodes(base, token, token.length());
     }
 
-    /**
-     * Only the codes before the token's first visible character. Codes later in the token (a trailing
-     * {@code \u00A7r}, say) take effect from where they appear, and the font applies them itself while drawing
-     * the token's text - so using them to style the whole token reset the word they trail.
-     */
     private static Style applyLeadingLegacyCodes(Style base, String token) {
         int end = 0;
         while (end + 1 < token.length() && token.charAt(end) == '\u00A7' &&
