@@ -1,22 +1,18 @@
-buildscript {
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-}
-
 plugins {
-    id "idea"
-    id "eclipse"
-    id "maven-publish"
-    id 'net.neoforged.moddev.legacyforge' version '2.0.91'
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
-sourceSets {
-    main.resources {
-        srcDir 'src/generated/resources'
-    }
+version = mod_version
+group = maven_group
+
+base {
+    // Sets the output jar prefix to match your requirement (e.g., neoforge-0.5.7.jar)
+    archivesName = 'neoforge'
 }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 repositories {
     mavenLocal()
@@ -25,23 +21,14 @@ repositories {
         name = "Repsy"
         url = uri("https://repo.repsy.io/mvn/user75142941/phoenixsuite")
     }
-    flatDir {
-        dir 'libs'
-    }
     maven {
-        // EMI
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
     }
 }
 
-version = mod_version
-group = maven_group
-base { archivesName = archives_base_name }
-java { sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17 }
-
-legacyForge {
-    version = project.minecraft_version + '-' + project.forge_version
+neoForge {
+    version = project.neoforge_version
 
     parchment {
         mappingsVersion = project.mapping_version
@@ -49,25 +36,19 @@ legacyForge {
     }
 
     runs {
-        configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
-        }
         client {
             client()
-            sourceSet = sourceSets.main
-            programArguments.addAll('--refresh-dependencies')
-            systemProperty('forge.enabledGameTestNamespaces', project.mod_id)
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         server {
             server()
-            sourceSet = sourceSets.main
-            systemProperty('forge.enabledGameTestNamespaces', project.mod_id)
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
             programArguments.addAll('--nogui')
         }
         data {
             data()
-            sourceSet = sourceSets.main
             programArguments.addAll('--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath())
         }
     }
@@ -79,11 +60,11 @@ legacyForge {
     }
 }
 
+sourceSets.main.resources.srcDir 'src/generated/resources'
+
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.1")
-   // modRuntimeOnly("dev.emi:emi-forge:${emi_version}+${minecraft_version}")
-    modCompileOnly("dev.emi:emi-forge:${emi_version}+${minecraft_version}")
-
+    compileOnly("dev.emi:emi-forge:${emi_version}")
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -94,31 +75,27 @@ tasks.named('processResources', ProcessResources).configure {
             "mod_name"         : mod_name,
             "mod_url"          : mod_url,
             "mod_author"       : mod_author,
-            "forge_version"    : forge_version.split("\\.")[0],
             "minecraft_version": minecraft_version,
+            "neoforge_version" : neoforge_version,
     ]
     inputs.properties(properties)
 
-    filesMatching("META-INF/mods.toml") {
+    filesMatching("META-INF/neoforge.mods.toml") {
         expand properties + [project: project]
     }
 }
 
-tasks.named('jar', Jar).configure { finalizedBy 'reobfJar' }
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = "UTF-8"
-    options.release.set(17)
+    options.encoding = 'UTF-8'
 }
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
             groupId = project.group
-            artifactId = base.archivesName.get()
+            artifactId = 'neoforge' // Keeps NeoForge distinct from legacy forge artifacts on Repsy
             version = project.version
-            artifact(tasks.named('jar').flatMap { it.archiveFile }) {
-                builtBy tasks.named('reobfJar')
-            }
+            from components.java
         }
     }
     repositories {
@@ -132,104 +109,3 @@ publishing {
         }
     }
 }
-
-tasks.register('publishToChronicles', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../PhoenixChronicles/libs, so Chronicles picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../PhoenixChronicles/libs'
-}
-
-tasks.register('publishToArchive', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../Phoenix-Archive/libs, so Archive picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../Phoenix-Archive/libs'
-}
-
-tasks.register('publishToGuilds', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../Phoenix-Guilds/libs, so Guilds picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../Phoenix-Guilds/libs'
-}
-
-tasks.register('publishToDomains', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../Phoenix-Domains/libs, so Domains picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../Phoenix-Domains/libs'
-}
-
-tasks.register('publishToExcavate', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../PhoenixExcavate/libs, so Excavate picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../PhoenixExcavate/libs'
-}
-
-tasks.register('publishToEssentials', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../PhoenixEssentials/libs, so Essentials picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../PhoenixEssentials/libs'
-}
-
-tasks.register('publishToSolaris', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../Solaris/libs, so Solaris picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../Solaris/libs'
-}
-
-tasks.register('publishToCore', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../PhoenixCore/libs, so PhoenixCore picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../PhoenixCore/libs'
-}
-
-tasks.register('publishToPhantasia', Copy) {
-    group = 'phoenix'
-    description = 'Builds this mod and copies the jar into ../Phantasia/libs, so Phantasia picks up local changes.'
-    dependsOn 'reobfJar'
-    from(layout.buildDirectory.dir('libs')) {
-        include '*.jar'
-        exclude '*-sources.jar'
-    }
-    into '../Phantasia/libs'
-}
-
-

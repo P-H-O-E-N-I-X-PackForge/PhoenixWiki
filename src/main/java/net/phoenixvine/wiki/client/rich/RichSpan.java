@@ -7,7 +7,15 @@ import java.util.List;
 
 public interface RichSpan {
 
-    record Typewriter(float charsPerSecond, boolean onClick, TypewriterGroup group, int offset) {}
+    /**
+     * @param repeat replay on every open; without it the text types out once per game session and then just shows
+     */
+    record Typewriter(float charsPerSecond, boolean onClick, TypewriterGroup group, int offset, boolean repeat) {
+
+        public Typewriter(float charsPerSecond, boolean onClick, TypewriterGroup group, int offset) {
+            this(charsPerSecond, onClick, group, offset, false);
+        }
+    }
 
     final class TypewriterGroup {
 
