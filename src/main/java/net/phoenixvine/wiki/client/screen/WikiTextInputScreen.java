@@ -311,6 +311,10 @@ public class WikiTextInputScreen extends Screen {
     }
 
     @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    }
+
+    @Override
     public boolean mouseDragged(double rmx, double rmy, int btn, double dragX, double dragY) {
         return super.mouseDragged(rmx / uiScale, rmy / uiScale, btn, dragX / uiScale, dragY / uiScale);
     }
