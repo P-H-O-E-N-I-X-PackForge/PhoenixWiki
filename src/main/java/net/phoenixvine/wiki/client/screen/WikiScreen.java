@@ -395,7 +395,8 @@ public class WikiScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics g) {}
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    }
 
     private void enableScissorScaled(GuiGraphics g, int x1, int y1, int x2, int y2) {
         g.enableScissor(Math.round(x1 * uiScale), Math.round(y1 * uiScale), Math.round(x2 * uiScale),
@@ -626,10 +627,11 @@ public class WikiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double rmx, double rmy, double delta) {
-        int visibleH = (vh - FOOTER_H - MARGIN) - (HEADER_H + MARGIN);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        int visibleH = (vh - FOOTER_H - MARGIN) / (HEADER_H + MARGIN);
         int maxScroll = Math.max(0, cachedContentH - visibleH);
-        scrollY = Math.max(0, Math.min(maxScroll, (int) (scrollY - delta * 14)));
+
+        this.scrollY = Math.max(0, Math.min(maxScroll, (int) (this.scrollY - scrollY * 14)));
         return true;
     }
 

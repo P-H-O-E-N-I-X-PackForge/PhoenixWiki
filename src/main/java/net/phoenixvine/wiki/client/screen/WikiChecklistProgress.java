@@ -1,8 +1,10 @@
 package net.phoenixvine.wiki.client.screen;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,8 +49,10 @@ public final class WikiChecklistProgress {
         loadedNamespaces.add(namespace);
         Path file = fileFor(namespace);
         if (!Files.exists(file)) return;
-        try {
-            CompoundTag tag = NbtIo.read(file.toFile());
+
+        try (DataInputStream input = new DataInputStream(Files.newInputStream(file))) {
+            // Updated in 1.21.1: Accepts DataInputStream + NbtAccounter
+            CompoundTag tag = NbtIo.read(input, NbtAccounter.unlimitedHeap());
             if (tag == null) return;
             for (String key : tag.getAllKeys()) {
                 STATE.put(namespace + "#" + key, tag.getBoolean(key));
@@ -66,7 +70,7 @@ public final class WikiChecklistProgress {
         try {
             Path file = fileFor(namespace);
             Files.createDirectories(file.getParent());
-            NbtIo.write(tag, file.toFile());
+            NbtIo.write(tag, file);
         } catch (IOException ignored) {}
     }
 

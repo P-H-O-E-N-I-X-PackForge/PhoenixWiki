@@ -1,5 +1,6 @@
 package net.phoenixvine.wiki.client.rich.render;
 
+import net.neoforged.fml.loading.FMLPaths;
 import net.phoenixvine.wiki.client.rich.RichSpan;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public final class TypewriterSupport {
     private static boolean playedLoaded = false;
 
     private static java.nio.file.Path playedFile() {
-        return net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get().resolve("phoenix_wiki")
+        return FMLPaths.CONFIGDIR.get().resolve("phoenix_wiki")
                 .resolve("typewriter_seen.txt");
     }
 

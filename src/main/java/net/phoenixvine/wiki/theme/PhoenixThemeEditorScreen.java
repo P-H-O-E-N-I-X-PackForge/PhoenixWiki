@@ -651,19 +651,21 @@ public class PhoenixThemeEditorScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double rmx, double rmy, double delta) {
+    public boolean mouseScrolled(double rmx, double rmy, double scrollX, double scrollY) {
         double mx = rmx / uiScale;
         double my = rmy / uiScale;
         int sbW = sidebarW();
+
         if (mx < virtualWidth - sbW) {
             List<String> vis = visibleThemes();
             int itemH = 14;
             int maxVis = Math.max(1, (virtualHeight - listRowsStartY - 6) / itemH);
             int maxScroll = Math.max(0, vis.size() - maxVis);
-            scrollOffset = Mth.clamp(scrollOffset - (int) delta, 0, maxScroll);
+
+            scrollOffset = Mth.clamp(scrollOffset - (int) scrollY, 0, maxScroll);
             return true;
         }
-        return super.mouseScrolled(mx, my, delta);
+        return super.mouseScrolled(mx, my, scrollX, scrollY);
     }
 
     @Override
@@ -780,7 +782,8 @@ public class PhoenixThemeEditorScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics g) {}
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    }
 
     private int sidebarW() {
         return Math.max(SIDEBAR_MIN, virtualWidth / 4);

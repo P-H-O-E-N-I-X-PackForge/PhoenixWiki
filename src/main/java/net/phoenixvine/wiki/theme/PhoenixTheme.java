@@ -2,11 +2,12 @@ package net.phoenixvine.wiki.theme;
 
 import com.google.gson.JsonElement;
 import net.minecraft.util.Mth;
-import net.minecraftforge.fml.loading.FMLPaths;
+
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import net.neoforged.fml.loading.FMLPaths;
 import net.phoenixvine.wiki.PhoenixWiki;
 
 import java.nio.file.Files;

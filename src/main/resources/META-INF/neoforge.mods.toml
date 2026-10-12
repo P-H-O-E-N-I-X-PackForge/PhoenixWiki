@@ -1,28 +1,32 @@
 modLoader = "javafml"
-loaderVersion = "[47,)"
+loaderVersion = "[4,)"
 license = "${mod_license}"
+issueTrackerURL = ""
 
 [[mods]]
-    modId = "${mod_id}"
-    version = "${version}"
-    displayName = "${mod_name}"
-    displayURL = "${mod_url}"
-    authors="${mod_author}"
-    description = '''
+modId = "${mod_id}"
+version = "${version}"
+displayName = "${mod_name}"
+displayURL = "${mod_url}"
+logoFile = ""
+credits = ""
+authors = "${mod_author}"
+description = '''
 Phoenix Wiki - a small, self-contained data-driven in-game wiki/markdown engine, meant to be
 jar-in-jar'd into other mods. Not a standalone content mod on its own; other mods call
 PhoenixWikiAPI to open a wiki backed by their own assets/<namespace>/wiki/<locale>/*.md pages.
 '''
 
-    [[dependencies.${mod_id}]]
-        modId = "forge"
-        mandatory = true
-        versionRange = "[${forge_version},)"
-        ordering = "NONE"
-        side = "BOTH"
-    [[dependencies.${mod_id}]]
-        modId = "minecraft"
-        mandatory = true
-        versionRange = "[${minecraft_version},)"
-        ordering = "NONE"
-        side = "BOTH"
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"

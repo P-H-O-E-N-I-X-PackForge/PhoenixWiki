@@ -11,6 +11,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import net.minecraft.util.StringUtil;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayDeque;
@@ -483,9 +484,11 @@ public class MultilineTextArea extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
-        if (mx < getX() || mx >= getX() + width || my < getY() || my >= getY() + height) return false;
-        return scrollBy(delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (mouseX < getX() || mouseX >= getX() + width || mouseY < getY() || mouseY >= getY() + height) {
+            return false;
+        }
+        return scrollBy(scrollY);
     }
 
     public boolean scrollBy(double delta) {
@@ -665,7 +668,9 @@ public class MultilineTextArea extends AbstractWidget {
     @Override
     public boolean charTyped(char ch, int mods) {
         if (!isFocused()) return false;
-        if (!SharedConstants.isAllowedChatCharacter(ch)) return false;
+
+        // Updated String helper check in 1.21.1
+        if (!StringUtil.isAllowedChatCharacter(ch)) return false;
 
         if (searchActive) {
             searchQuery += ch;

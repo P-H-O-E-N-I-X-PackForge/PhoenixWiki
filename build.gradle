@@ -9,7 +9,7 @@ group = maven_group
 
 base {
     // Sets the output jar prefix to match your requirement (e.g., neoforge-0.5.7.jar)
-    archivesName = 'neoforge'
+    archivesName = 'phoenix-wik-neoforge'
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
@@ -24,6 +24,17 @@ repositories {
     maven {
         name = "TerraformersMC"
         url = "https://maven.terraformersmc.com/"
+    }
+    maven {
+        name = "Sleeping Town"
+        url = "https://repo.sleeping.town/"
+    }
+    maven {
+        name = "CurseMaven"
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
     }
 }
 
@@ -64,7 +75,7 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.1")
-    compileOnly("dev.emi:emi-forge:${emi_version}")
+    compileOnly("curse.maven:emi-580555:8081408")
 }
 
 tasks.named('processResources', ProcessResources).configure {

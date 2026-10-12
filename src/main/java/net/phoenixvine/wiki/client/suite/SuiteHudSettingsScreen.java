@@ -120,7 +120,7 @@ public class SuiteHudSettingsScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partial) {
         var theme = PhoenixTheme.current();
-        this.renderBackground(g);
+        this.renderBackground(g, mouseX, mouseY, partial);
 
         g.fill(panelX - 1, panelY - 1, panelX + panelW + 1, panelY + panelH + 1,
                 theme.border.getColor());
