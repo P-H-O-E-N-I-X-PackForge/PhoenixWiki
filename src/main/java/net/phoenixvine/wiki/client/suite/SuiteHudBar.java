@@ -45,6 +45,8 @@ public final class SuiteHudBar {
     public static final int PRIORITY_EXCAVATE = 50;
     public static final int PRIORITY_ARCHIVE = 60;
     public static final int PRIORITY_PHANTASIA = 70;
+    public static final int PRIORITY_CONFLUX = 80;
+    public static final int PRIORITY_CONTINUUM = 90;
 
     private static final int BTN_SIZE = 20;
     private static final int GAP = 2;
