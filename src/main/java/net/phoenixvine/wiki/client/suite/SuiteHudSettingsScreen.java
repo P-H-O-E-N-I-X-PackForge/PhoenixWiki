@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class SuiteHudSettingsScreen extends Screen {
+    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    }
+
 
     private final Screen parent;
 
