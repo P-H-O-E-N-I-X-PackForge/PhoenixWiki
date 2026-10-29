@@ -628,7 +628,7 @@ public class WikiScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        int visibleH = (vh - FOOTER_H - MARGIN) / (HEADER_H + MARGIN);
+        int visibleH = (vh - FOOTER_H - MARGIN) - (HEADER_H + MARGIN);
         int maxScroll = Math.max(0, cachedContentH - visibleH);
 
         this.scrollY = Math.max(0, Math.min(maxScroll, (int) (this.scrollY - scrollY * 14)));
