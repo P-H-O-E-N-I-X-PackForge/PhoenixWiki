@@ -1,5 +1,6 @@
 package net.phoenixvine.wiki.client.rich.render;
 
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.phoenixvine.wiki.client.rich.RichSpan;
 
 import java.util.ArrayList;
@@ -26,6 +27,37 @@ public final class TypewriterSupport {
     }
 
     private static final Map<String, State> STATES = new HashMap<>();
+
+    private static final java.util.Set<String> PLAYED = new java.util.HashSet<>();
+    private static boolean playedLoaded = false;
+
+    private static java.nio.file.Path playedFile() {
+        return FMLPaths.CONFIGDIR.get().resolve("phoenix_wiki")
+                .resolve("typewriter_seen.txt");
+    }
+
+    private static void loadPlayed() {
+        if (playedLoaded) return;
+        playedLoaded = true;
+        try {
+            java.nio.file.Path file = playedFile();
+            if (java.nio.file.Files.exists(file)) {
+                PLAYED.addAll(java.nio.file.Files.readAllLines(file, java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (java.io.IOException ignored) {}
+    }
+
+    private static void markPlayed(String key) {
+        loadPlayed();
+        if (!PLAYED.add(key)) return;
+        try {
+            java.nio.file.Path file = playedFile();
+            java.nio.file.Files.createDirectories(file.getParent());
+            java.nio.file.Files.writeString(file, key + System.lineSeparator(),
+                    java.nio.charset.StandardCharsets.UTF_8,
+                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (java.io.IOException ignored) {}
+    }
     private static int framesSincePrune = 0;
 
     public record Frame(String text, boolean awaitingClick, String key) {}
@@ -36,6 +68,9 @@ public final class TypewriterSupport {
         long now = System.currentTimeMillis();
         prune(now);
 
+        loadPlayed();
+        if (!tw.repeat() && PLAYED.contains(key)) return new Frame(span.text(), false, key);
+
         State state = STATES.computeIfAbsent(key, k -> new State());
         if (now - state.lastSeenMs > RESTART_AFTER_UNSEEN_MS) {
             state.startMs = -1;
@@ -43,7 +78,10 @@ public final class TypewriterSupport {
         }
         state.lastSeenMs = now;
 
-        if (state.finished) return new Frame(span.text(), false, key);
+        if (state.finished) {
+            markPlayed(key);
+            return new Frame(span.text(), false, key);
+        }
 
         if (state.startMs < 0) {
             if (tw.onClick()) {
@@ -55,6 +93,7 @@ public final class TypewriterSupport {
         int groupVisible = (int) ((now - state.startMs) / 1000f * Math.max(1f, tw.charsPerSecond()));
         if (groupVisible >= tw.group().total()) {
             state.finished = true;
+            markPlayed(key);
             return new Frame(span.text(), false, key);
         }
 

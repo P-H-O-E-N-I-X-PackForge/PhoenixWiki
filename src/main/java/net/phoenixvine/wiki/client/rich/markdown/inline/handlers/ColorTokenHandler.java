@@ -34,10 +34,13 @@ public final class ColorTokenHandler implements InlineHandler {
                 lower.startsWith("typewriter:")) {
             float charsPerSecond = DEFAULT_TYPEWRITER_SPEED;
             boolean onClick = false;
+            boolean repeat = false;
             String[] parts = lower.split(":");
             for (int p = 1; p < parts.length; p++) {
                 if (parts[p].equals("click")) {
                     onClick = true;
+                } else if (parts[p].equals("repeat")) {
+                    repeat = true;
                 } else if (!parts[p].equals("auto")) {
                     try {
                         float parsed = Float.parseFloat(parts[p]);
@@ -45,7 +48,7 @@ public final class ColorTokenHandler implements InlineHandler {
                     } catch (NumberFormatException ignored) {}
                 }
             }
-            s.beginTypewriter(charsPerSecond, onClick, i);
+            s.beginTypewriter(charsPerSecond, onClick, repeat, i);
             return end + 1;
         }
         if (token.equalsIgnoreCase("reset")) {

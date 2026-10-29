@@ -20,13 +20,19 @@ public final class InlineParseState {
 
     public float typewriterSpeed = 0f;
     public boolean typewriterOnClick = false;
+    public boolean typewriterRepeat = false;
     public RichSpan.TypewriterGroup typewriterGroup = null;
     private int typewriterOffset = 0;
 
     public void beginTypewriter(float charsPerSecond, boolean onClick, int position) {
+        beginTypewriter(charsPerSecond, onClick, false, position);
+    }
+
+    public void beginTypewriter(float charsPerSecond, boolean onClick, boolean repeat, int position) {
         flush();
         typewriterSpeed = charsPerSecond;
         typewriterOnClick = onClick;
+        typewriterRepeat = repeat;
         typewriterGroup = new RichSpan.TypewriterGroup(input.hashCode() + "@" + position);
         typewriterOffset = 0;
     }
@@ -56,7 +62,7 @@ public final class InlineParseState {
         if (typewriterGroup != null) {
             int visible = net.phoenixvine.wiki.client.rich.render.TypewriterSupport.visibleLength(text);
             typewriter = new RichSpan.Typewriter(typewriterSpeed, typewriterOnClick, typewriterGroup,
-                    typewriterOffset);
+                    typewriterOffset, typewriterRepeat);
             typewriterOffset += visible;
             typewriterGroup.add(visible);
         }
