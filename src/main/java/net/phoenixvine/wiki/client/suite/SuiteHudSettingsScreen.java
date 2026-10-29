@@ -16,7 +16,6 @@ public class SuiteHudSettingsScreen extends Screen {
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
     }
 
-
     private final Screen parent;
 
     private static final int ROW_H = 20;

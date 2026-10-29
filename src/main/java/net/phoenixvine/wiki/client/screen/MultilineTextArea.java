@@ -669,7 +669,6 @@ public class MultilineTextArea extends AbstractWidget {
     public boolean charTyped(char ch, int mods) {
         if (!isFocused()) return false;
 
-        // Updated String helper check in 1.21.1
         if (!StringUtil.isAllowedChatCharacter(ch)) return false;
 
         if (searchActive) {

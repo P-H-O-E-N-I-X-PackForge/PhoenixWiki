@@ -51,7 +51,7 @@ public final class WikiChecklistProgress {
         if (!Files.exists(file)) return;
 
         try (DataInputStream input = new DataInputStream(Files.newInputStream(file))) {
-            // Updated in 1.21.1: Accepts DataInputStream + NbtAccounter
+            
             CompoundTag tag = NbtIo.read(input, NbtAccounter.unlimitedHeap());
             if (tag == null) return;
             for (String key : tag.getAllKeys()) {

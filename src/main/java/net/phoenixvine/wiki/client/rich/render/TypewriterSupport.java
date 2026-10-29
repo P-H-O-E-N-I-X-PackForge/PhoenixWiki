@@ -28,10 +28,6 @@ public final class TypewriterSupport {
 
     private static final Map<String, State> STATES = new HashMap<>();
 
-    /**
-     * Typewriter groups that have finished once; they show instantly from then on unless marked repeat. Saved to
-     * {@code config/phoenix_wiki/typewriter_seen.txt}, so it survives restarts (delete the file to replay everything).
-     */
     private static final java.util.Set<String> PLAYED = new java.util.HashSet<>();
     private static boolean playedLoaded = false;
 
