@@ -134,7 +134,7 @@ public final class SuiteGates {
     public static Component requirement(String expression) {
         MutableComponent out = Component.empty();
         boolean firstAlternative = true;
-        for (String either : expression.split("\|")\|")) {
+        for (String either : expression.split("\\|")) {
             MutableComponent alternative = Component.empty();
             boolean firstTerm = true;
             for (String term : either.split("&")) {
