@@ -1,5 +1,7 @@
 package net.phoenixvine.wiki.client.suite;
 
+import net.phoenixvine.wiki.client.WikiText;
+import net.phoenixvine.wiki.api.WikiLang;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -536,26 +538,26 @@ public final class SuiteHudBar {
         if (hovered != null) {
             List<Component> tip = new ArrayList<>();
             if (hovered.isSettings()) {
-                tip.add(Component.literal("§fSuite HUD Settings"));
-                tip.add(Component.literal("§7Button scale, and which buttons show"));
+                tip.add(WikiLang.tr("phoenix_wiki.suite_hud_bar.suite_hud_settings"));
+                tip.add(WikiLang.tr("phoenix_wiki.suite_hud_bar.button_scale_and_which_buttons"));
             } else if (hovered.entry().modId().equals(mercyModId) &&
                     System.currentTimeMillis() - mercyAtMs < MERCY_TOOLTIP_MS) {
-                tip.add(Component.literal("§d🥺 You've tried to hide me 3 times."));
-                tip.add(Component.literal("§7I'm staying, sorry."));
+                tip.add(WikiLang.tr("phoenix_wiki.suite_hud_bar.you_ve_tried_to_hide"));
+                tip.add(WikiLang.tr("phoenix_wiki.suite_hud_bar.i_m_staying_sorry"));
             } else {
                 int count = SuiteHudConfig.getHoverCount(hovered.entry().modId());
                 tip.add(Component.literal(count >= 25 ?
                         escalatedTooltipLine(count) : hovered.entry().tooltip().get().getString()));
-                tip.add(Component.literal("§7Right-click to hide"));
+                tip.add(WikiLang.tr("phoenix_wiki.suite_hud_bar.right_click_to_hide"));
             }
             g.renderComponentTooltip(mc.font, tip, (int) hoverMx, (int) hoverMy);
         }
     }
 
     private static String escalatedTooltipLine(int count) {
-        if (count >= 400) return "§d§oYou've hovered this " + count + " times.";
-        if (count >= 100) return "§d§oPlease, no more.";
-        return "§d§oStill here.";
+        if (count >= 400) return WikiText.str("phoenix_wiki.suite_hud_bar.you_ve_hovered_this_times", count);
+        if (count >= 100) return WikiText.str("phoenix_wiki.suite_hud_bar.please_no_more");
+        return WikiText.str("phoenix_wiki.suite_hud_bar.still_here");
     }
 
     private static void drawIcon(GuiGraphics g, Entry e, int x, int y, int size, PhoenixTheme t) {

@@ -1,5 +1,7 @@
 package net.phoenixvine.wiki.client.screen;
 
+import net.phoenixvine.wiki.client.WikiText;
+import net.phoenixvine.wiki.api.WikiLang;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -94,7 +96,7 @@ public class WikiScreen extends Screen {
     }
 
     public WikiScreen(Screen parent, String namespace, String basePath, String targetPageId, WikiTheme theme) {
-        super(Component.literal("Wiki"));
+        super(WikiLang.tr("phoenix_wiki.wiki_screen.wiki"));
         this.parent = parent;
         this.namespace = namespace;
         this.basePath = basePath;
@@ -156,20 +158,20 @@ public class WikiScreen extends Screen {
 
         searchBox = new EditBox(font, 4, HEADER_H + 3, sidebarW - 8, SEARCH_H, Component.empty());
         searchBox.setMaxLength(64);
-        searchBox.setHint(Component.literal("§8Search…"));
+        searchBox.setHint(WikiLang.tr("phoenix_wiki.wiki_screen.search"));
         searchBox.setBordered(true);
         addRenderableWidget(searchBox);
         recomputeVisibleIndices();
 
-        addRenderableWidget(Button.builder(Component.literal("§7✕ Close"),
+        addRenderableWidget(Button.builder(WikiLang.tr("phoenix_wiki.wiki_screen.close"),
                 b -> {
                     if (minecraft != null) minecraft.setScreen(parent);
                 })
                 .bounds(vw / 2 - 36, vh - FOOTER_H + 6, 72, 16).build());
 
-        addRenderableWidget(Button.builder(Component.literal("§7+ New"), b -> openNewPageEditor())
+        addRenderableWidget(Button.builder(WikiLang.tr("phoenix_wiki.wiki_screen.new"), b -> openNewPageEditor())
                 .bounds(vw - 8 - 44 - 4 - 44, 6, 44, 16).build());
-        addRenderableWidget(Button.builder(Component.literal("§7✎ Edit"), b -> openEditCurrentPage())
+        addRenderableWidget(Button.builder(WikiLang.tr("phoenix_wiki.wiki_screen.edit"), b -> openEditCurrentPage())
                 .bounds(vw - 8 - 44, 6, 44, 16).build());
     }
 
@@ -416,7 +418,7 @@ public class WikiScreen extends Screen {
 
         String title = notFoundPage != null ? notFoundPage.title() :
                 pages.isEmpty() ? "Wiki" : pages.get(Math.min(activePage, pages.size() - 1)).title();
-        drawHeader(g, "§fWiki §7" + title);
+        drawHeader(g, WikiText.str("phoenix_wiki.wiki.wiki", title));
 
         searchBox.setX(4);
         searchBox.setY(HEADER_H + 3);
@@ -458,7 +460,7 @@ public class WikiScreen extends Screen {
             g.drawString(font, pageTitle, indent, rowY + 3, textCol, false);
         }
         if (entries.isEmpty()) {
-            g.drawString(font, "§8No matches", 8, listTop + 6, theme.textFaint(), false);
+            g.drawString(font, WikiText.str("phoenix_wiki.wiki.no_matches"), 8, listTop + 6, theme.textFaint(), false);
         }
         g.disableScissor();
 
@@ -516,7 +518,7 @@ public class WikiScreen extends Screen {
             } else {
                 for (RichSpan.Region r : richRegions) {
                     if (r.span() instanceof RichSpan.CodeCopy cc && cc.code().equals(justCopiedCode)) {
-                        String msg = "§a✓ Copied!";
+                        String msg = WikiText.str("phoenix_wiki.wiki.copied");
                         int labelX = cx + cw - font.width(msg) - 4;
                         g.pose().pushPose();
                         g.pose().translate(0f, 0f, 400f);
@@ -593,7 +595,7 @@ public class WikiScreen extends Screen {
 
         int boxX = cx + cw - TOC_W;
         int boxY = contentTop;
-        String toggleLabel = tocOpen ? "§7On this page ▾" : "§7On this page ▸";
+        String toggleLabel = tocOpen ? WikiText.str("phoenix_wiki.wiki.on_this_page") : WikiText.str("phoenix_wiki.wiki.on_this_page_2");
         int toggleH = 12;
         boolean toggleHov = mx >= boxX && mx < boxX + TOC_W && my >= boxY && my < boxY + toggleH;
 

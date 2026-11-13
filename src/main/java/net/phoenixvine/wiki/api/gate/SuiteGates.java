@@ -1,5 +1,6 @@
 package net.phoenixvine.wiki.api.gate;
 
+import net.phoenixvine.wiki.api.WikiLang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -142,8 +143,8 @@ public final class SuiteGates {
                 if (id.isEmpty()) continue;
                 boolean negate = id.startsWith("!");
                 if (negate) id = id.substring(1).trim();
-                if (!firstTerm) alternative.append(Component.literal(" and ").withStyle(ChatFormatting.GRAY));
-                if (negate) alternative.append(Component.literal("not ").withStyle(ChatFormatting.GRAY));
+                if (!firstTerm) alternative.append(WikiLang.tr("phoenix_wiki.suite_gates.and").withStyle(ChatFormatting.GRAY));
+                if (negate) alternative.append(WikiLang.tr("phoenix_wiki.suite_gates.not").withStyle(ChatFormatting.GRAY));
                 alternative.append(describe(id).copy().withStyle(ChatFormatting.GOLD));
                 firstTerm = false;
             }
@@ -180,9 +181,9 @@ public final class SuiteGates {
     }
 
     private static Component denialMessage(Component needs) {
-        MutableComponent message = Component.literal("You cannot access this yet.").withStyle(ChatFormatting.RED);
+        MutableComponent message = WikiLang.tr("phoenix_wiki.suite_gates.you_cannot_access_this_yet").withStyle(ChatFormatting.RED);
         if (needs != null) {
-            message.append(Component.literal(" Requires: ").withStyle(ChatFormatting.GRAY)).append(needs);
+            message.append(WikiLang.tr("phoenix_wiki.suite_gates.requires").withStyle(ChatFormatting.GRAY)).append(needs);
         }
         return message;
     }

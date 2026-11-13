@@ -1,5 +1,7 @@
 package net.phoenixvine.wiki.client.screen;
 
+import net.phoenixvine.wiki.client.WikiText;
+import net.phoenixvine.wiki.api.WikiLang;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -109,7 +111,7 @@ public class WikiTextInputScreen extends Screen {
         int hexY = btnY - 36;
         hexBox = new EditBox(font, px + 8 + font.width("Hex: "), hexY, 58, 12, Component.empty());
         hexBox.setMaxLength(7);
-        hexBox.setHint(Component.literal("§8#RRGGBB"));
+        hexBox.setHint(WikiLang.tr("phoenix_wiki.wiki_text_input_screen.rrggbb"));
         addRenderableWidget(hexBox);
     }
 
@@ -142,8 +144,8 @@ public class WikiTextInputScreen extends Screen {
         renderFormatButtons(g, mx, my);
 
         int half = pw / 2 - 6;
-        drawBtn(g, mx, my, px + 6, btnY, half, 16, "§a✓ Confirm", C_GREEN);
-        drawBtn(g, mx, my, px + pw / 2 + 3, btnY, half, 16, "§c✕ Cancel", C_BTN);
+        drawBtn(g, mx, my, px + 6, btnY, half, 16, WikiText.str("phoenix_wiki.wiki_text_input.confirm"), C_GREEN);
+        drawBtn(g, mx, my, px + pw / 2 + 3, btnY, half, 16, WikiText.str("phoenix_wiki.wiki_text_input.cancel"), C_BTN);
 
         g.pose().popPose();
     }
@@ -157,10 +159,10 @@ public class WikiTextInputScreen extends Screen {
 
     private void renderHexRow(GuiGraphics g, int mx, int my) {
         int rowY = btnY - 36;
-        g.drawString(font, "§8Hex: ", px + 8, rowY + 2, C_TEXT_DIM, false);
+        g.drawString(font, WikiText.str("phoenix_wiki.wiki_text_input.hex"), px + 8, rowY + 2, C_TEXT_DIM, false);
 
         int insX = px + 8 + font.width("Hex: ") + 60;
-        drawBtn(g, mx, my, insX, rowY - 1, 40, 14, "§7insert", C_BTN);
+        drawBtn(g, mx, my, insX, rowY - 1, 40, 14, WikiText.str("phoenix_wiki.wiki_text_input.insert"), C_BTN);
 
         String hexVal = hexBox.getValue().trim();
         if (hexVal.startsWith("#") && hexVal.length() == 7) {
@@ -171,7 +173,7 @@ public class WikiTextInputScreen extends Screen {
                 g.fill(insX + 44, rowY, insX + 58, rowY + 12, col);
             }
         }
-        g.drawString(font, "§8{#RRGGBB} syntax.", insX + 60, rowY + 2, C_TEXT_DIM, false);
+        g.drawString(font, WikiText.str("phoenix_wiki.wiki_text_input.rrggbb_syntax"), insX + 60, rowY + 2, C_TEXT_DIM, false);
     }
 
     private void renderFormatButtons(GuiGraphics g, int mx, int my) {

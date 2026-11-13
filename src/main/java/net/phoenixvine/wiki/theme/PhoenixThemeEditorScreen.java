@@ -1,5 +1,7 @@
 package net.phoenixvine.wiki.theme;
 
+import net.phoenixvine.wiki.client.WikiText;
+import net.phoenixvine.wiki.api.WikiLang;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -75,7 +77,7 @@ public class PhoenixThemeEditorScreen extends Screen {
     }
 
     public PhoenixThemeEditorScreen(Screen parent, String previewAppName) {
-        super(Component.literal("Theme Editor"));
+        super(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.theme_editor"));
         this.parent = parent;
         this.previewAppName = previewAppName;
         this.ownerModId = PhoenixTheme.resolveCallerModId();
@@ -147,7 +149,7 @@ public class PhoenixThemeEditorScreen extends Screen {
         y += rh + 6;
 
         int ctrlY = Math.max(y + 4, virtualHeight - 114);
-        nameInput = new EditBox(font, virtualWidth - sbW + 10, ctrlY, sbW - 20, 16, Component.literal("Theme name"));
+        nameInput = new EditBox(font, virtualWidth - sbW + 10, ctrlY, sbW - 20, 16, WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.theme_name"));
         nameInput.setValue(curName);
         nameInput.setMaxLength(32);
         nameInput.setResponder(s -> confirmActive = false);
@@ -155,30 +157,24 @@ public class PhoenixThemeEditorScreen extends Screen {
 
         int halfW = (sbW - 20 - 4) / 2;
         addRenderableWidget(Button
-                .builder(Component.literal("§aSave"), b -> save())
+                .builder(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.save"), b -> save())
                 .bounds(virtualWidth - sbW + 10, ctrlY + 20, halfW, 18)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Saves the current colors under the name above. Overwrites that theme if it\n" +
-                                "already exists (only ever a custom one, never a built-in).")))
+                .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.saves_the_current_colors_under")))
                 .build());
         addRenderableWidget(Button
-                .builder(Component.literal("§b+ New"), b -> newTheme())
+                .builder(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.new"), b -> newTheme())
                 .bounds(virtualWidth - sbW + 10 + halfW + 4, ctrlY + 20, sbW - 20 - halfW - 4, 18)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Starts a brand-new custom theme (a copy of the current colors) under its own\n" +
-                                "name, so editing it never touches whatever theme you started from.")))
+                .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.starts_a_brand_new_custom")))
                 .build());
 
         addRenderableWidget(Button
-                .builder(Component.literal("🎲 Reroll"), b -> reroll())
+                .builder(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.reroll"), b -> reroll())
                 .bounds(virtualWidth - sbW + 10, ctrlY + 42, sbW - 20, 18)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Randomizes every color and gives it a silly name.\n" +
-                                "Ctrl+Z to revert if it's too much.")))
+                .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.randomizes_every_color_and_gives")))
                 .build());
 
         addRenderableWidget(Button
-                .builder(Component.literal("§7Exit"), b -> {
+                .builder(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.exit"), b -> {
                     if (hasChanges()) {
                         if (!confirmActive || !"EXIT".equals(pendingAction)) {
                             confirmActive = true;
@@ -192,18 +188,14 @@ public class PhoenixThemeEditorScreen extends Screen {
                 .bounds(virtualWidth - sbW + 10, ctrlY + 64, sbW - 20, 18).build());
 
         addRenderableWidget(Button
-                .builder(Component.literal(PhoenixTheme.isSharedMode() ?
-                        "§7Mode: §fShared suite-wide" : "§7Mode: §fPer-mod"),
+                .builder(Component.literal(PhoenixTheme.isSharedMode() ? WikiText.str("phoenix_wiki.phoenix_theme_editor.mode_shared_suite_wide") : WikiText.str("phoenix_wiki.phoenix_theme_editor.mode_per_mod")),
                         b -> {
                             PhoenixTheme.setSharedMode(!PhoenixTheme.isSharedMode());
                             lastTrackedName = null;
                             init();
                         })
                 .bounds(virtualWidth - sbW + 10, ctrlY + 86, sbW - 20, 18)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Shared: every Phoenix suite mod uses this one theme.\n" +
-                                "Per-mod: each mod remembers its own. The theme you set here only\n" +
-                                "applies to whichever mod opened this screen.")))
+                .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.phoenix_theme_editor_screen.shared_every_phoenix_suite_mod")))
                 .build());
     }
 
@@ -329,15 +321,15 @@ public class PhoenixThemeEditorScreen extends Screen {
         float headerPulse = animPulse(0.7f, 0.3f, 900.0);
         int headerAccent = (Math.min(255, (int) (0xFF * headerPulse)) << 24) | (C_ACCENT & 0xFFFFFF);
         g.fill(virtualWidth - sbW, 27, virtualWidth, 28, headerAccent);
-        g.drawString(font, "§fTheme Editor", virtualWidth - sbW + 8, 8, C_ACCENT, false);
+        g.drawString(font, WikiText.str("phoenix_wiki.phoenix_theme_editor.theme_editor"), virtualWidth - sbW + 8, 8, C_ACCENT, false);
 
         String status;
         int statusC;
         if (confirmActive) {
-            status = "§eClick again to discard!";
+            status = WikiText.str("phoenix_wiki.phoenix_theme_editor.click_again_to_discard");
             statusC = 0xFFFFBB33;
         } else if (hasChanges()) {
-            status = "§7● " + PhoenixTheme.getActiveName(ownerModId) + " (unsaved)";
+            status = WikiText.str("phoenix_wiki.phoenix_theme_editor.unsaved", PhoenixTheme.getActiveName(ownerModId));
             statusC = 0xFFFFBB33;
         } else {
             status = "§7○ " + PhoenixTheme.getActiveName(ownerModId);
@@ -434,7 +426,7 @@ public class PhoenixThemeEditorScreen extends Screen {
 
         int animY = 8;
 
-        g.drawString(font, "§7State colors · accent line · text hierarchy", mockX, animY, C_FAINT, false);
+        g.drawString(font, WikiText.str("phoenix_wiki.phoenix_theme_editor.state_colors_accent_line_text"), mockX, animY, C_FAINT, false);
 
         int mockTop = animY + 13;
         int mockH = Math.min(150, (virtualHeight - 20) / 2);
@@ -493,9 +485,9 @@ public class PhoenixThemeEditorScreen extends Screen {
 
         int lblY = ny + sz + 3;
         if (lblY + 8 < mockTop + mockH) {
-            g.drawCenteredString(font, "§8Done", n1x + sz / 2, lblY, theme.textFaint.getColor());
-            g.drawCenteredString(font, "§8Active", n2x + sz / 2, lblY, theme.textFaint.getColor());
-            g.drawCenteredString(font, "§8Locked", n3x + sz / 2, lblY, theme.textFaint.getColor());
+            g.drawCenteredString(font, WikiText.str("phoenix_wiki.phoenix_theme_editor.done"), n1x + sz / 2, lblY, theme.textFaint.getColor());
+            g.drawCenteredString(font, WikiText.str("phoenix_wiki.phoenix_theme_editor.active"), n2x + sz / 2, lblY, theme.textFaint.getColor());
+            g.drawCenteredString(font, WikiText.str("phoenix_wiki.phoenix_theme_editor.locked"), n3x + sz / 2, lblY, theme.textFaint.getColor());
         }
 
         int swY = mockTop + mockH - 7;
@@ -509,7 +501,7 @@ public class PhoenixThemeEditorScreen extends Screen {
         }
 
         int listY = mockTop + mockH + 8;
-        g.drawString(font, "§8Themes  §7(click to swap)", mockX, listY, C_FAINT, false);
+        g.drawString(font, WikiText.str("phoenix_wiki.phoenix_theme_editor.themes_click_to_swap"), mockX, listY, C_FAINT, false);
         listY += 12;
         listRowsStartY = listY;
 
