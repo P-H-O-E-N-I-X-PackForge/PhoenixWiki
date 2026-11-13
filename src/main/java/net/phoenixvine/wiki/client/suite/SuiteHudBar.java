@@ -49,11 +49,34 @@ public final class SuiteHudBar {
     private static final int BTN_SIZE = 20;
     private static final int GAP = 2;
     private static final int MARGIN = 4;
+
+    /**
+     * How much the buttons shrink in a window smaller than the screen. They are full size when the window is as
+     * tall as the monitor (fullscreen) and scale down with the window height from there.
+     */
+    private static float autoScale() {
+        var window = Minecraft.getInstance().getWindow();
+        if (window == null) return 1f;
+        var monitor = window.findBestMonitor();
+        if (monitor == null) return 1f;
+        int monitorHeight = monitor.getCurrentMode().getHeight();
+        if (monitorHeight <= 0) return 1f;
+        float scale = window.getHeight() / (float) monitorHeight;
+        return Math.max(0.5f, Math.min(1f, scale));
+    }
+
+    private static int margin() {
+        return Math.max(1, Math.round(MARGIN * autoScale()));
+    }
+
+    private static int gap() {
+        return Math.max(1, Math.round(GAP * autoScale()));
+    }
     private static final int GRID_ROWS = 3;
 
     public static int barX() {
         List<HudSlot> slots = computeLayout();
-        if (slots.isEmpty()) return MARGIN;
+        if (slots.isEmpty()) return margin();
         int minX = Integer.MAX_VALUE;
         for (HudSlot s : slots) minX = Math.min(minX, s.x());
         return minX;
@@ -61,7 +84,7 @@ public final class SuiteHudBar {
 
     public static int barY() {
         List<HudSlot> slots = computeLayout();
-        if (slots.isEmpty()) return MARGIN;
+        if (slots.isEmpty()) return margin();
         int minY = Integer.MAX_VALUE;
         for (HudSlot s : slots) minY = Math.min(minY, s.y());
         return minY;
@@ -122,7 +145,7 @@ public final class SuiteHudBar {
     private record HudSlot(Entry entry, boolean isSettings, String key, int x, int y, int size) {}
 
     private static int sizeFor(String modId) {
-        return Math.round(BTN_SIZE * SuiteHudConfig.getEffectiveScale(modId));
+        return Math.round(BTN_SIZE * autoScale() * SuiteHudConfig.getEffectiveScale(modId));
     }
 
     public static void resetAllButtonPositions() {
@@ -187,16 +210,16 @@ public final class SuiteHudBar {
             }
 
             int[] colX = new int[cols];
-            int cx = MARGIN;
+            int cx = margin();
             for (int c = 0; c < cols; c++) {
                 colX[c] = cx;
-                cx += colW[c] + GAP;
+                cx += colW[c] + gap();
             }
             int[] rowY = new int[rows];
-            int cy = MARGIN;
+            int cy = margin();
             for (int r = 0; r < rows; r++) {
                 rowY[r] = cy;
-                cy += rowH[r] + GAP;
+                cy += rowH[r] + gap();
             }
 
             var window = Minecraft.getInstance().getWindow();
@@ -256,14 +279,14 @@ public final class SuiteHudBar {
         List<HudSlot> slots = computeLayout();
         int maxRight = 0;
         for (HudSlot s : slots) maxRight = Math.max(maxRight, s.x() + s.size());
-        return slots.isEmpty() ? 0 : maxRight + MARGIN;
+        return slots.isEmpty() ? 0 : maxRight + margin();
     }
 
     public static int barHeight() {
         List<HudSlot> slots = computeLayout();
         int maxBottom = 0;
         for (HudSlot s : slots) maxBottom = Math.max(maxBottom, s.y() + s.size());
-        return slots.isEmpty() ? 0 : maxBottom + MARGIN;
+        return slots.isEmpty() ? 0 : maxBottom + margin();
     }
 
     private static final String EMI_RECIPE_SCREEN = "dev.emi.emi.screen.RecipeScreen";
