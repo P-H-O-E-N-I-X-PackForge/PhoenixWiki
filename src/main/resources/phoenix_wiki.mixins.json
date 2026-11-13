@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "net.phoenixvine.wiki.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "minVersion": "0.8",
+  "mixins": [],
+  "client": [
+    "LevelRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

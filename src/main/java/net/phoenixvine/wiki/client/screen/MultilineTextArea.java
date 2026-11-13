@@ -1,5 +1,6 @@
 package net.phoenixvine.wiki.client.screen;
 
+import net.phoenixvine.wiki.client.WikiText;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -199,7 +200,7 @@ public class MultilineTextArea extends AbstractWidget {
         g.fill(barX, barY, barX + barW, barY + barH, 0xEE1A1624);
         drawBorder(g, barX, barY, barW, barH, C_ACCENT);
         boolean caretOn = (System.currentTimeMillis() / 530) % 2 == 0;
-        g.drawString(font, "Find: " + searchQuery + (caretOn ? "_" : ""), barX + 4, barY + 3, 0xFFFFFFFF, false);
+        g.drawString(font, WikiText.str("phoenix_wiki.multiline_text_area.find", searchQuery, (caretOn ? "_" : "")), barX + 4, barY + 3, 0xFFFFFFFF, false);
         String countText = searchQuery.isEmpty() ? ""
                 : searchMatches.isEmpty() ? "0/0" : (searchMatchIndex + 1) + "/" + searchMatches.size();
         if (!countText.isEmpty()) {

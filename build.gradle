@@ -26,6 +26,18 @@ repositories {
         url = "https://maven.terraformersmc.com/"
     }
     maven {
+        name = "GTCEu Maven"
+        url = "https://maven.gtceu.com/"
+        content {
+            includeGroup "com.gregtechceu.gtceu"
+            includeGroup "brachy.modularui"
+        }
+    }
+    maven {
+        name = "FTB Maven"
+        url = "https://maven.ftb.dev/releases"
+    }
+    maven {
         name = "Sleeping Town"
         url = "https://repo.sleeping.town/"
     }
@@ -76,6 +88,11 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 dependencies {
     compileOnly("org.jetbrains:annotations:26.0.1")
     compileOnly("curse.maven:emi-580555:8081408")
+    compileOnly("com.gregtechceu.gtceu:gtceu-${minecraft_version}:${gtm_version}") { transitive = false }
+    compileOnly("brachy.modularui:modularui-mc${minecraft_version}:${mui_version}") { transitive = false }
+    compileOnly("dev.ftb.mods:ftb-teams-neoforge:${ftbteams_version}") { transitive = false }
+    compileOnly("dev.ftb.mods:ftb-library-neoforge:${ftblibrary_version}") { transitive = false }
+    compileOnly("net.phoenixvine.guilds:phoenix-guilds-neoforge:${phoenix_guilds_version}") { transitive = false }
 }
 
 tasks.named('processResources', ProcessResources).configure {

@@ -1,5 +1,7 @@
 package net.phoenixvine.wiki.client.suite;
 
+import net.phoenixvine.wiki.client.WikiText;
+import net.phoenixvine.wiki.api.WikiLang;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
@@ -26,7 +28,7 @@ public class SuiteHudSettingsScreen extends Screen {
     private int panelX, panelY, panelW, panelH;
 
     public SuiteHudSettingsScreen(Screen parent) {
-        super(Component.literal("Suite HUD Settings"));
+        super(WikiLang.tr("phoenix_wiki.suite_hud_settings_screen.suite_hud_settings"));
         this.parent = parent;
     }
 
@@ -68,13 +70,13 @@ public class SuiteHudSettingsScreen extends Screen {
             final int rowY = y;
             boolean enabled = SuiteHudBar.isButtonEnabled(modId);
             this.addRenderableWidget(Button.builder(
-                    Component.literal(enabled ? "§aON" : "§8OFF"),
+                    Component.literal(enabled ? "§aON" : WikiText.str("phoenix_wiki.suite_hud_settings.off")),
                     b -> {
                         SuiteHudBar.setButtonEnabled(modId, !SuiteHudBar.isButtonEnabled(modId));
                         this.init();
                     })
                     .bounds(panelX + 122, rowY, 34, 16)
-                    .tooltip(Tooltip.create(Component.literal("Show/hide this button in the HUD bar")))
+                    .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.suite_hud_settings_screen.show_hide_this_button_in")))
                     .build());
 
             Float override = SuiteHudConfig.getButtonScaleOverride(modId);
@@ -87,35 +89,30 @@ public class SuiteHudSettingsScreen extends Screen {
                         this.init();
                     })
                     .bounds(panelX + 264, rowY, 16, 16)
-                    .tooltip(Tooltip.create(Component.literal(override != null ?
-                            "Reset to the suite-wide scale" : "Already following the suite-wide scale")))
+                    .tooltip(Tooltip.create(Component.literal(override != null ? WikiText.str("phoenix_wiki.suite_hud_settings.reset_to_the_suite_wide") : WikiText.str("phoenix_wiki.suite_hud_settings.already_following_the_suite_wide"))))
                     .build());
 
             y += ROW_H;
         }
 
-        this.addRenderableWidget(Button.builder(Component.literal(SuiteHudBar.isGravityMode() ?
-                        "§a🪂 Gravity mode: ON" : "§8🪂 Gravity mode: OFF"),
+        this.addRenderableWidget(Button.builder(Component.literal(SuiteHudBar.isGravityMode() ? WikiText.str("phoenix_wiki.suite_hud_settings.gravity_mode_on") : WikiText.str("phoenix_wiki.suite_hud_settings.gravity_mode_off")),
                         b -> {
                             SuiteHudBar.setGravityMode(!SuiteHudBar.isGravityMode());
                             this.init();
                         })
                 .bounds(panelX + 20, panelY + panelH - FOOTER_H + 6, panelW - 40, 16)
-                .tooltip(Tooltip.create(Component.literal(
-                        "Drops every HUD button -- wherever it's currently sitting -- to the\n" +
-                                "bottom of the screen, piling up like dropped items. Turning it off\n" +
-                                "puts dropped buttons back in the grid.")))
+                .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.suite_hud_settings_screen.drops_every_hud_button_wherever")))
                 .build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("§7Reset positions"), b -> {
+        this.addRenderableWidget(Button.builder(WikiLang.tr("phoenix_wiki.suite_hud_settings_screen.reset_positions"), b -> {
                     SuiteHudBar.resetAllButtonPositions();
                     this.init();
                 })
                 .bounds(panelX + 20, panelY + panelH - FOOTER_H + 28, 110, 16)
-                .tooltip(Tooltip.create(Component.literal("Put every dragged HUD button back in its default spot")))
+                .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.suite_hud_settings_screen.put_every_dragged_hud_button")))
                 .build());
 
-        this.addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
+        this.addRenderableWidget(Button.builder(WikiLang.tr("phoenix_wiki.suite_hud_settings_screen.done"), b -> onClose())
                 .bounds(panelX + panelW - 100, panelY + panelH - FOOTER_H + 28, 80, 16)
                 .build());
     }
@@ -129,16 +126,16 @@ public class SuiteHudSettingsScreen extends Screen {
                 theme.border.getColor());
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH, theme.panel.getColor());
 
-        g.drawCenteredString(this.font, "Suite HUD Settings", panelX + panelW / 2, panelY + 8,
+        g.drawCenteredString(this.font, WikiText.str("phoenix_wiki.suite_hud_settings_screen.suite_hud_settings"), panelX + panelW / 2, panelY + 8,
                 theme.accent.getColor());
 
         int y = panelY + HEADER_H - ROW_H;
-        g.drawString(this.font, "Suite-wide scale", panelX + 12, y + 4, theme.text.getColor(), false);
+        g.drawString(this.font, WikiText.str("phoenix_wiki.suite_hud_settings.suite_wide_scale"), panelX + 12, y + 4, theme.text.getColor(), false);
         y += ROW_H + 4;
 
         List<String> modIds = SuiteHudBar.getRegisteredModIds();
         if (modIds.isEmpty()) {
-            g.drawString(this.font, "§7No suite mods registered yet.", panelX + 12, y + 4,
+            g.drawString(this.font, WikiText.str("phoenix_wiki.suite_hud_settings.no_suite_mods_registered_yet"), panelX + 12, y + 4,
                     theme.textDim.getColor(), false);
         }
         for (String modId : modIds) {
