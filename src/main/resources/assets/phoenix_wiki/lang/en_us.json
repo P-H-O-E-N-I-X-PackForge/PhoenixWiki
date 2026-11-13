@@ -52,5 +52,13 @@
   "phoenix_wiki.phoenix_theme_editor.locked": "§8Locked",
   "phoenix_wiki.phoenix_theme_editor.themes_click_to_swap": "§8Themes  §7(click to swap)",
   "phoenix_wiki.phoenix_theme_editor.click_again_to_discard": "§eClick again to discard!",
-  "phoenix_wiki.phoenix_theme_editor.unsaved": "§7● %s (unsaved)"
+  "phoenix_wiki.phoenix_theme_editor.unsaved": "§7● %s (unsaved)",
+  "phoenix_wiki.suite_hud_bar.right_click_to_hide": "§7Right-click to hide",
+  "phoenix_wiki.suite_hud_bar.i_m_staying_sorry": "§7I'm staying, sorry.",
+  "phoenix_wiki.suite_hud_bar.you_ve_tried_to_hide": "§d🥺 You've tried to hide me 3 times.",
+  "phoenix_wiki.suite_hud_bar.button_scale_and_which_buttons": "§7Button scale, and which buttons show",
+  "phoenix_wiki.suite_hud_bar.suite_hud_settings": "§fSuite HUD Settings",
+  "phoenix_wiki.suite_hud_bar.you_ve_hovered_this_times": "§d§oYou've hovered this %s times.",
+  "phoenix_wiki.suite_hud_bar.please_no_more": "§d§oPlease, no more.",
+  "phoenix_wiki.suite_hud_bar.still_here": "§d§oStill here."
 }
