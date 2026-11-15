@@ -55,10 +55,13 @@ public final class MachineHud {
         TabStrip screen = null;
         if (machine.getLevel() != null && machine.getLevel().isClientSide) {
             HudModel m = model.get();
-            Actions sender = (id, value) -> sync.callSyncedAction("hud_control", buf -> {
-                buf.writeVarInt(id);
-                buf.writeVarInt(value);
-            });
+            Actions sender = (id, value) -> {
+    var out = new net.minecraft.network.RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(),
+            machine.getLevel().registryAccess());
+    out.writeVarInt(id);
+                out.writeVarInt(value);
+    sync.callSyncedAction("hud_control", out);
+};
             ArrayDeque<float[]> history = HISTORY.computeIfAbsent(machine, k -> new ArrayDeque<>());
             Sampler sampler = new Sampler(m, history);
             var tabs = new java.util.ArrayList<TabStrip.Tab>();

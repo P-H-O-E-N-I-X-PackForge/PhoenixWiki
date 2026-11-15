@@ -12,7 +12,7 @@
   "phoenix_wiki.suite_hud_settings_screen.done": "Done",
   "phoenix_wiki.suite_hud_settings_screen.put_every_dragged_hud_button": "Put every dragged HUD button back in its default spot",
   "phoenix_wiki.suite_hud_settings_screen.reset_positions": "§7Reset positions",
-  "phoenix_wiki.suite_hud_settings_screen.drops_every_hud_button_wherever": "Drops every HUD button -- wherever it's currently sitting -- to the\nbottom of the screen, piling up like dropped items. Turning it off\nputs dropped buttons back in the grid.",
+  "phoenix_wiki.suite_hud_settings_screen.drops_every_hud_button_wherever": "Drops every HUD button , wherever it's currently sitting, to the\nbottom of the screen, piling up like dropped items. Turning it off\nputs dropped buttons back in the grid.",
   "phoenix_wiki.suite_hud_settings_screen.show_hide_this_button_in": "Show/hide this button in the HUD bar",
   "phoenix_wiki.suite_hud_settings_screen.suite_hud_settings": "Suite HUD Settings",
   "phoenix_wiki.phoenix_theme_editor_screen.shared_every_phoenix_suite_mod": "Shared: every Phoenix suite mod uses this one theme.\nPer-mod: each mod remembers its own. The theme you set here only\napplies to whichever mod opened this screen.",
