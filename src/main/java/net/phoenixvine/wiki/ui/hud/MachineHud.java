@@ -91,7 +91,7 @@ public final class MachineHud {
                         classic.content().accept(container);
                         main.child(container);
                     }
-                }).build(sync, settings);
+                }).build(data, sync, settings);
         if (tabs != null) HudPanel.apply(panel, tabs);
         return panel;
     }
