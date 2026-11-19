@@ -25,26 +25,23 @@ public class CanvasWidget extends Widget<CanvasWidget> implements Interactable {
         return this;
     }
 
+    // the mouse in this widget's own pixels, as the drawing saw it: ModularUI takes the panel's scale into account in
+    // it. The events use it too, as the panel is scaled to fit the window and the absolute mouse is not
+    private int lastX;
+    private int lastY;
+
     private int localX(ModularGuiContext ctx) {
-        if (fitWidth > 0) {
-            return net.phoenixvine.wiki.ui.PanelFit.localMouse(this, ctx.getAbsMouseX(), ctx.getAbsMouseY(),
-                    fitWidth,
-                    fitHeight)[0];
-        }
-        return ctx.getAbsMouseX() - getArea().x;
+        return lastX;
     }
 
     private int localY(ModularGuiContext ctx) {
-        if (fitWidth > 0) {
-            return net.phoenixvine.wiki.ui.PanelFit.localMouse(this, ctx.getAbsMouseX(), ctx.getAbsMouseY(),
-                    fitWidth,
-                    fitHeight)[1];
-        }
-        return ctx.getAbsMouseY() - getArea().y;
+        return lastY;
     }
 
     @Override
     public void draw(ModularGuiContext context, WidgetThemeEntry<?> widgetTheme) {
+        lastX = context.getMouseX();
+        lastY = context.getMouseY();
         var g = context.getGraphics();
         GuiDraw.enableScissor(g, 0, 0, getArea().width, getArea().height);
         painter.render(g, getArea().width, getArea().height, localX(context), localY(context));
