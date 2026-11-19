@@ -43,6 +43,8 @@ public final class SuiteGates {
     private static final Map<String, BiPredicate<String, ServerPlayer>> RESOLVERS = new ConcurrentHashMap<>();
     private static final Map<String, Function<String, Component>> DESCRIBERS = new ConcurrentHashMap<>();
     private static final List<Binding> BINDINGS = new CopyOnWriteArrayList<>();
+    /** The bindings written in {@code config/phoenix_gates.json}; replaced whole each time the file is read. */
+    private static volatile List<Binding> configBindings = List.of();
     private static final Set<String> WARNED = ConcurrentHashMap.newKeySet();
 
     private SuiteGates() {}
@@ -163,7 +165,7 @@ public final class SuiteGates {
     public static Component denial(String feature, String scope) {
         MutableComponent needs = Component.empty();
         boolean first = true;
-        for (Binding binding : BINDINGS) {
+        for (Binding binding : bindings()) {
             if (!binding.feature().equals(feature)) continue;
             if (!binding.scope().equals(ANY_SCOPE) && !binding.scope().equals(scope)) continue;
             for (String expression : binding.anyOf()) {
@@ -200,7 +202,14 @@ public final class SuiteGates {
     }
 
     public static List<Binding> bindings() {
-        return new ArrayList<>(BINDINGS);
+        List<Binding> all = new ArrayList<>(BINDINGS);
+        all.addAll(configBindings);
+        return all;
+    }
+
+    /** Replaces the bindings that came from the config file. */
+    static void setConfigBindings(List<Binding> bindings) {
+        configBindings = List.copyOf(bindings);
     }
 
     /**
@@ -209,7 +218,7 @@ public final class SuiteGates {
      */
     public static boolean allowed(ServerPlayer player, String feature, String scope) {
         boolean bound = false;
-        for (Binding binding : BINDINGS) {
+        for (Binding binding : bindings()) {
             if (!binding.feature().equals(feature)) continue;
             if (!binding.scope().equals(ANY_SCOPE) && !binding.scope().equals(scope)) continue;
             bound = true;
