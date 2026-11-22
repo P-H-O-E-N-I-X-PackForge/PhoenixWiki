@@ -180,7 +180,9 @@ public final class SuiteHudBar {
             List<String> keys = new ArrayList<>();
             List<Entry> owners = new ArrayList<>();
             List<Integer> sizes = new ArrayList<>();
+            boolean hudOn = SuiteHudConfig.isHudEnabled();
             for (Entry e : ENTRIES) {
+                if (!hudOn) break;
                 if (!SuiteHudConfig.isEnabled(e.modId())) continue;
                 int size = sizeFor(e.modId());
                 int count = Math.max(0, e.slotCount().getAsInt());
@@ -477,6 +479,13 @@ public final class SuiteHudBar {
 
     private static String lastHoveredKey = null;
 
+    /** Hovers of one button before the easter-egg tooltip can appear at all (was 25). */
+    private static final int EGG_MIN_HOVERS = 150;
+    /** Once past the threshold, roughly one hover in this many shows it. */
+    private static final int EGG_ONE_IN = 6;
+    private static final java.util.Random RNG = new java.util.Random();
+    private static boolean eggRolledThisHover = false;
+
     private static void hideButton(String modId) {
         int count = SuiteHudConfig.incrementHideCount(modId);
         if (count % 3 == 0) {
@@ -497,6 +506,7 @@ public final class SuiteHudBar {
         int panel = theme.panel.getColor();
         int border = theme.accent.getColor();
 
+        boolean transparent = SuiteHudConfig.isTransparentButtons();
         List<HudSlot> slots = computeLayout();
         HudSlot hovered = slotAt(slots, hoverMx, hoverMy);
 
@@ -507,11 +517,15 @@ public final class SuiteHudBar {
         for (HudSlot s : slots) {
             boolean isHovered = s == hovered;
             int x = s.x(), y = s.y(), size = s.size();
-            g.fill(x, y, x + size, y + size, isHovered ? border : panel);
-            g.fill(x, y, x + size, y + 1, border);
-            g.fill(x, y, x + 1, y + size, border);
-            g.fill(x + size - 1, y, x + size, y + size, border);
-            g.fill(x, y + size - 1, x + size, y + size, border);
+            if (transparent) {
+                if (isHovered) g.fill(x, y, x + size, y + size, 0x30FFFFFF);
+            } else {
+                g.fill(x, y, x + size, y + size, isHovered ? border : panel);
+                g.fill(x, y, x + size, y + 1, border);
+                g.fill(x, y, x + 1, y + size, border);
+                g.fill(x + size - 1, y, x + size, y + size, border);
+                g.fill(x, y + size - 1, x + size, y + size, border);
+            }
             if (s.isSettings()) {
                 drawSettingsIcon(g, x, y, size, theme);
             } else {
@@ -533,6 +547,8 @@ public final class SuiteHudBar {
         String hoveredKey = hovered != null ? hovered.key() : null;
         if (hoveredKey != null && !hoveredKey.equals(lastHoveredKey) && !hovered.isSettings()) {
             SuiteHudConfig.incrementHoverCount(hovered.entry().modId());
+            // Decide once per hover whether the egg shows, so the tooltip doesn't flicker between frames.
+            eggRolledThisHover = RNG.nextInt(EGG_ONE_IN) == 0;
         }
         lastHoveredKey = hoveredKey;
 
@@ -547,7 +563,8 @@ public final class SuiteHudBar {
                 tip.add(WikiLang.tr("phoenix_wiki.suite_hud_bar.i_m_staying_sorry"));
             } else {
                 int count = SuiteHudConfig.getHoverCount(hovered.entry().modId());
-                tip.add(Component.literal(count >= 25 ?
+                boolean egg = SuiteHudConfig.isEasterEggsEnabled() && count >= EGG_MIN_HOVERS && eggRolledThisHover;
+                tip.add(Component.literal(egg ?
                         escalatedTooltipLine(count) : hovered.entry().tooltip().get().getString()));
                 tip.add(WikiLang.tr("phoenix_wiki.suite_hud_bar.right_click_to_hide"));
             }
@@ -556,8 +573,8 @@ public final class SuiteHudBar {
     }
 
     private static String escalatedTooltipLine(int count) {
-        if (count >= 400) return WikiText.str("phoenix_wiki.suite_hud_bar.you_ve_hovered_this_times", count);
-        if (count >= 100) return WikiText.str("phoenix_wiki.suite_hud_bar.please_no_more");
+        if (count >= 1500) return WikiText.str("phoenix_wiki.suite_hud_bar.you_ve_hovered_this_times", count);
+        if (count >= 500) return WikiText.str("phoenix_wiki.suite_hud_bar.please_no_more");
         return WikiText.str("phoenix_wiki.suite_hud_bar.still_here");
     }
 
