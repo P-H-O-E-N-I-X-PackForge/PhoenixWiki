@@ -21,6 +21,7 @@ public class SuiteHudSettingsScreen extends Screen {
     private static final int PANEL_W = 300;
     private static final int HEADER_H = 46;
     private static final int FOOTER_H = 50;
+    private static final int TOGGLE_ROWS = 3;
 
     private int panelX, panelY, panelW, panelH;
 
@@ -45,7 +46,7 @@ public class SuiteHudSettingsScreen extends Screen {
 
         List<String> modIds = SuiteHudBar.getRegisteredModIds();
         panelW = PANEL_W;
-        panelH = HEADER_H + Math.max(1, modIds.size()) * ROW_H + FOOTER_H;
+        panelH = HEADER_H + TOGGLE_ROWS * ROW_H + Math.max(1, modIds.size()) * ROW_H + FOOTER_H;
         panelX = (this.width - panelW) / 2;
         panelY = Math.max(8, (this.height - panelH) / 2);
 
@@ -54,6 +55,19 @@ public class SuiteHudSettingsScreen extends Screen {
         this.addRenderableWidget(new ScaleSlider(panelX + 150, y, 130, 16,
                 SuiteHudConfig.getGlobalScale(), SuiteHudConfig::setGlobalScale));
         y += ROW_H + 4;
+
+        this.addRenderableWidget(toggle(y, "phoenix_wiki.suite_hud_settings.hud_suite",
+                SuiteHudConfig.isHudEnabled(), SuiteHudConfig::setHudEnabled,
+                "phoenix_wiki.suite_hud_settings.hud_suite_tooltip"));
+        y += ROW_H;
+        this.addRenderableWidget(toggle(y, "phoenix_wiki.suite_hud_settings.transparent_buttons",
+                SuiteHudConfig.isTransparentButtons(), SuiteHudConfig::setTransparentButtons,
+                "phoenix_wiki.suite_hud_settings.transparent_buttons_tooltip"));
+        y += ROW_H;
+        this.addRenderableWidget(toggle(y, "phoenix_wiki.suite_hud_settings.easter_eggs",
+                SuiteHudConfig.isEasterEggsEnabled(), SuiteHudConfig::setEasterEggsEnabled,
+                "phoenix_wiki.suite_hud_settings.easter_eggs_tooltip"));
+        y += ROW_H;
 
         if (modIds.isEmpty()) {
             y += ROW_H;
@@ -67,11 +81,11 @@ public class SuiteHudSettingsScreen extends Screen {
             final int rowY = y;
             boolean enabled = SuiteHudBar.isButtonEnabled(modId);
             this.addRenderableWidget(Button.builder(
-                    Component.literal(enabled ? "§aON" : WikiText.str("phoenix_wiki.suite_hud_settings.off")),
-                    b -> {
-                        SuiteHudBar.setButtonEnabled(modId, !SuiteHudBar.isButtonEnabled(modId));
-                        this.init();
-                    })
+                            Component.literal(enabled ? "§aON" : WikiText.str("phoenix_wiki.suite_hud_settings.off")),
+                            b -> {
+                                SuiteHudBar.setButtonEnabled(modId, !SuiteHudBar.isButtonEnabled(modId));
+                                this.init();
+                            })
                     .bounds(panelX + 122, rowY, 34, 16)
                     .tooltip(Tooltip.create(WikiLang.tr("phoenix_wiki.suite_hud_settings_screen.show_hide_this_button_in")))
                     .build());
@@ -114,6 +128,18 @@ public class SuiteHudSettingsScreen extends Screen {
                 .build());
     }
 
+    private Button toggle(int y, String labelKey, boolean value, Consumer<Boolean> setter, String tooltipKey) {
+        Component label = Component.literal(WikiText.str(labelKey) + ": "
+                + (value ? "§aON" : WikiText.str("phoenix_wiki.suite_hud_settings.off")));
+        return Button.builder(label, b -> {
+                    setter.accept(!value);
+                    this.init();
+                })
+                .bounds(panelX + 20, y, panelW - 40, 16)
+                .tooltip(Tooltip.create(WikiLang.tr(tooltipKey)))
+                .build();
+    }
+
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partial) {
         var theme = PhoenixTheme.current();
@@ -128,7 +154,7 @@ public class SuiteHudSettingsScreen extends Screen {
 
         int y = panelY + HEADER_H - ROW_H;
         g.drawString(this.font, WikiText.str("phoenix_wiki.suite_hud_settings.suite_wide_scale"), panelX + 12, y + 4, theme.text.getColor(), false);
-        y += ROW_H + 4;
+        y += ROW_H + 4 + TOGGLE_ROWS * ROW_H;
 
         List<String> modIds = SuiteHudBar.getRegisteredModIds();
         if (modIds.isEmpty()) {

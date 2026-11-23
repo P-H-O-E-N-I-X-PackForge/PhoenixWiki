@@ -3,6 +3,7 @@ package net.phoenixvine.wiki.client.suite;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.phoenixvine.wiki.PhoenixWiki;
@@ -28,6 +29,12 @@ public final class SuiteHudConfig {
 
     private static final class Data {
 
+        /** Master switch: false hides every suite HUD button at once (per-button toggles are left untouched). */
+        boolean hudEnabled = true;
+        /** Draw the buttons with no background or border, just the icon. */
+        boolean transparentButtons = false;
+        /** The "still here" / "please no more" tooltip easter egg after many hovers. */
+        boolean easterEggs = true;
         Set<String> disabled = new HashSet<>();
         float globalScale = 1.0f;
         Map<String, Float> buttonScale = new HashMap<>();
@@ -65,7 +72,7 @@ public final class SuiteHudConfig {
             try (FileReader r = new FileReader(file)) {
                 JsonElement root = JsonParser.parseReader(r);
                 if (root != null && root.isJsonArray()) {
-                    
+
                     for (JsonElement e : root.getAsJsonArray()) data.disabled.add(e.getAsString());
                 } else if (root != null && root.isJsonObject()) {
                     Data loaded = GSON.fromJson(root, Data.class);
@@ -77,6 +84,11 @@ public final class SuiteHudConfig {
                         if (loaded.hoverCount != null) data.hoverCount.putAll(loaded.hoverCount);
                         if (loaded.gravityPlaced != null) data.gravityPlaced.addAll(loaded.gravityPlaced);
                         data.gravityMode = loaded.gravityMode;
+                        // Gson leaves a missing boolean at false, so only trust these when the file has them.
+                        JsonObject obj = root.getAsJsonObject();
+                        data.hudEnabled = !obj.has("hudEnabled") || loaded.hudEnabled;
+                        data.transparentButtons = obj.has("transparentButtons") && loaded.transparentButtons;
+                        data.easterEggs = !obj.has("easterEggs") || loaded.easterEggs;
                         data.globalScale = clamp(loaded.globalScale <= 0f ? 1.0f : loaded.globalScale);
                     }
                 }
@@ -90,6 +102,52 @@ public final class SuiteHudConfig {
 
     private static float clamp(float scale) {
         return Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
+    }
+
+    /** Master switch for the whole HUD suite. */
+    public static boolean isHudEnabled() {
+        synchronized (LOCK) {
+            ensureLoaded();
+            return data.hudEnabled;
+        }
+    }
+
+    public static void setHudEnabled(boolean enabled) {
+        synchronized (LOCK) {
+            ensureLoaded();
+            data.hudEnabled = enabled;
+            save();
+        }
+    }
+
+    public static boolean isTransparentButtons() {
+        synchronized (LOCK) {
+            ensureLoaded();
+            return data.transparentButtons;
+        }
+    }
+
+    public static void setTransparentButtons(boolean transparent) {
+        synchronized (LOCK) {
+            ensureLoaded();
+            data.transparentButtons = transparent;
+            save();
+        }
+    }
+
+    public static boolean isEasterEggsEnabled() {
+        synchronized (LOCK) {
+            ensureLoaded();
+            return data.easterEggs;
+        }
+    }
+
+    public static void setEasterEggsEnabled(boolean enabled) {
+        synchronized (LOCK) {
+            ensureLoaded();
+            data.easterEggs = enabled;
+            save();
+        }
     }
 
     public static boolean isEnabled(String modId) {
