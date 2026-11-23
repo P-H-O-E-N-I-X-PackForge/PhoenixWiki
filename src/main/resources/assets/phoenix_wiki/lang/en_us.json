@@ -60,5 +60,11 @@
   "phoenix_wiki.suite_hud_bar.suite_hud_settings": "§fSuite HUD Settings",
   "phoenix_wiki.suite_hud_bar.you_ve_hovered_this_times": "§d§oYou've hovered this %s times.",
   "phoenix_wiki.suite_hud_bar.please_no_more": "§d§oPlease, no more.",
-  "phoenix_wiki.suite_hud_bar.still_here": "§d§oStill here."
+  "phoenix_wiki.suite_hud_bar.still_here": "§d§oStill here.",
+  "phoenix_wiki.suite_hud_settings.hud_suite": "HUD",
+  "phoenix_wiki.suite_hud_settings.hud_suite_tooltip": "Show or hide the entire HUD suite at once. Your per-button settings below are kept.",
+  "phoenix_wiki.suite_hud_settings.transparent_buttons": "Clear",
+  "phoenix_wiki.suite_hud_settings.transparent_buttons_tooltip": "Draw HUD buttons with no background or border, just the icon.",
+  "phoenix_wiki.suite_hud_settings.easter_eggs": "Eggs",
+  "phoenix_wiki.suite_hud_settings.easter_eggs_tooltip": "Toggle the occasional hidden tooltip messages on HUD buttons."
 }

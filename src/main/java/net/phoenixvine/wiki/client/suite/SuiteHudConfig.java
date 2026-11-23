@@ -72,7 +72,7 @@ public final class SuiteHudConfig {
             try (FileReader r = new FileReader(file)) {
                 JsonElement root = JsonParser.parseReader(r);
                 if (root != null && root.isJsonArray()) {
-
+                    
                     for (JsonElement e : root.getAsJsonArray()) data.disabled.add(e.getAsString());
                 } else if (root != null && root.isJsonObject()) {
                     Data loaded = GSON.fromJson(root, Data.class);
