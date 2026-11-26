@@ -314,19 +314,13 @@ public final class SuiteHudBar {
         var mc = Minecraft.getInstance();
         if (mc.player == null || entriesEmpty() || screenWantsBar(screen)) return List.of();
 
+        // one rectangle per button: the buttons that sit in the bar are not a solid block, and a box round all of them
+        // would make EMI move its own panels out of the way of empty space
         List<int[]> out = new ArrayList<>();
-        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE;
         for (HudSlot s : computeLayout()) {
-            if (SuiteHudConfig.getButtonAnchor(s.key()) != null || physics.containsKey(s.key())) {
-                out.add(new int[] { s.x(), s.y(), s.size(), s.size() });
-            } else {
-                minX = Math.min(minX, s.x());
-                minY = Math.min(minY, s.y());
-                maxX = Math.max(maxX, s.x() + s.size());
-                maxY = Math.max(maxY, s.y() + s.size());
-            }
+            if (s.size() <= 0) continue;
+            out.add(new int[] { s.x() - 1, s.y() - 1, s.size() + 2, s.size() + 2 });
         }
-        if (minX != Integer.MAX_VALUE) out.add(0, new int[] { minX, minY, maxX - minX, maxY - minY });
         return out;
     }
 

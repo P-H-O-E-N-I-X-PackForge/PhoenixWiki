@@ -60,5 +60,11 @@
   "phoenix_wiki.phoenix_theme_editor.locked": "§8Locked",
   "phoenix_wiki.phoenix_theme_editor.themes_click_to_swap": "§8Themes  §7(click to swap)",
   "phoenix_wiki.phoenix_theme_editor.click_again_to_discard": "§eClick again to discard!",
-  "phoenix_wiki.phoenix_theme_editor.unsaved": "§7● %s (unsaved)"
+  "phoenix_wiki.phoenix_theme_editor.unsaved": "§7● %s (unsaved)",
+  "phoenix_wiki.suite_hud_settings.easter_eggs": "Eggs",
+  "phoenix_wiki.suite_hud_settings.easter_eggs_tooltip": "Toggle the occasional hidden tooltip messages on HUD buttons.",
+  "phoenix_wiki.suite_hud_settings.hud_suite": "HUD",
+  "phoenix_wiki.suite_hud_settings.hud_suite_tooltip": "Show or hide the entire HUD suite at once. Your per-button settings below are kept.",
+  "phoenix_wiki.suite_hud_settings.transparent_buttons": "Clear",
+  "phoenix_wiki.suite_hud_settings.transparent_buttons_tooltip": "Draw HUD buttons with no background or border, just the icon."
 }
